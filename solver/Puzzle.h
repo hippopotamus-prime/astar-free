@@ -19,14 +19,12 @@
 ** Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 ****************************************************************************/
 
-#ifndef __PUZZLE__
-#define __PUZZLE__
-
-using namespace std;
+#ifndef PUZZLE_
+#define PUZZLE_
 
 #include <iostream>
 #include <list>
-#include <ext/hash_set>
+#include <unordered_set>
 
 enum Tile
 {
@@ -48,11 +46,11 @@ class Puzzle
                 bool operator<(const State& rhs) const;
                 bool operator==(const State& rhs) const;
 
-                void print(ostream& out) const;
+                void print(std::ostream& out) const;
                 bool isFinished() const;
                 unsigned char distanceToFinish() const;
                 unsigned char distanceFromStart() const;
-                list<State*> expand();
+                std::list<State*> expand();
                 State* getParent() const;
                 bool hasParent() const;       
 
@@ -85,10 +83,10 @@ class Puzzle
         };
 
         static void init(Tile map[10][16]);
-        static void init(istream& input);
-        static unsigned int solve(ostream& out = cout);    
+        static void init(std::istream& input);
+        static unsigned int solve(std::ostream& out = std::cout);    
         static void printAsm(unsigned int moves_to_finish,
-            ostream& out = cout);    
+            std::ostream& out = std::cout);
 
     private:
         static State* getStartState();
@@ -106,7 +104,7 @@ class Puzzle
 };
 
 
-namespace __gnu_cxx     //stlp_std
+namespace std
 {
     template<> struct hash<Puzzle::StatePtr>
     {

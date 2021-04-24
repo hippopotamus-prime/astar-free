@@ -19,16 +19,14 @@
 ** Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 ****************************************************************************/
 
-using namespace std;
-
 #include <iostream>
 #include <string>
 #include <stack>
 #include <set>
-#include <ext/hash_set>
+#include <unordered_set>
 #include "Puzzle.h"
 
-using namespace __gnu_cxx; //stlp_std;
+using namespace std;
 
 int Puzzle::map[10][16];
 unsigned short Puzzle::rmasks[16];
@@ -144,7 +142,7 @@ Puzzle::State* Puzzle::getStartState()
 
 unsigned int Puzzle::solve(ostream& out)
 {
-    hash_set<StatePtr> closed;
+    unordered_set<StatePtr> closed;
     set<StatePtr> open;
     State* current = getStartState();
     unsigned char max_moves = 0;
@@ -212,16 +210,14 @@ unsigned int Puzzle::solve(ostream& out)
 
 
     //Clean up......
-    for(set<StatePtr>::iterator open_it = open.begin();
-    open_it != open.end(); ++open_it)
+    for (auto& state_ptr: open)
     {
-        delete (*open_it).toPointer();
+        delete state_ptr.toPointer();
     }
 
-    for(hash_set<StatePtr>::iterator closed_it = closed.begin();
-    closed_it != closed.end(); ++closed_it)
+    for (auto& state_ptr: closed)
     {
-        delete (*closed_it).toPointer();
+        delete state_ptr.toPointer();
     } 
 
     return 0;

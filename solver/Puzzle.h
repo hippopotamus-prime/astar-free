@@ -26,11 +26,6 @@
 #include <list>
 #include <unordered_set>
 
-enum Tile
-{
-    S, W, R, P, B
-};
-
 class Puzzle
 {
     public:
@@ -82,7 +77,6 @@ class Puzzle
                 State* m_ptr;
         };
 
-        static void init(Tile map[10][16]);
         static void init(std::istream& input);
         static unsigned int solve(std::ostream& out = std::cout);    
         static void printAsm(unsigned int moves_to_finish,

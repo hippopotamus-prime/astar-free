@@ -65,10 +65,13 @@ void Puzzle::init(istream& input)
 
         switch(c)
         {
+            // Wall
             case 'W':
                 map[j][i] = -1;
                 ++char_count;
                 break;
+
+            // Collectible
             case 'R':
             case 'o':
                 map[j][i] = 1 << pickups;
@@ -77,56 +80,27 @@ void Puzzle::init(istream& input)
                 cmasks[pickups++] = 1 << j;
                 ++char_count;
                 break;
+
+            // Player
             case 'P':
                 player_start_x = i;
                 player_start_y = j;
                 ++char_count;
                 break;
+
+            // Block
             case 'B':
                 block_start_x = i;
                 block_start_y = j;
                 ++char_count;
                 break;
+
+            // Empty Space
             case 'S':
             case '.':
                 ++char_count;
                 break;
         }    
-    }
-}
-
-void Puzzle::init(Tile input[10][16])
-{
-    unsigned int pickups = 0;
-    pickup_start_flags = 0;
-
-    for(unsigned int i = 0; i < 16; ++i)
-    {
-        for(unsigned int j = 0; j < 10; ++j)
-        {
-            switch(input[j][i])
-            {
-                case W:
-                    map[j][i] = -1;
-                    break;
-                case R:
-                    map[j][i] = 1 << pickups;
-                    pickup_start_flags |= 1 << pickups;
-                    rmasks[pickups] = 1 << i;
-                    cmasks[pickups++] = 1 << j;
-                    break;
-                case P:
-                    player_start_x = i;
-                    player_start_y = j;
-                    break;
-                case B:
-                    block_start_x = i;
-                    block_start_y = j;
-                    break;
-                case S:
-                    break;
-            }
-        }
     }
 }
 

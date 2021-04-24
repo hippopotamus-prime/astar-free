@@ -51,7 +51,6 @@ void Puzzle::init(istream& input)
     unsigned int pickups = 0;
     pickup_start_flags = 0;
 
-    char c;
     unsigned int i, j;
     unsigned int char_count = 0;
 
@@ -123,6 +122,8 @@ void Puzzle::init(Tile input[10][16])
                 case B:
                     block_start_x = i;
                     block_start_y = j;
+                    break;
+                case S:
                     break;
             }
         }

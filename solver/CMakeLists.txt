@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.1.0)
 project(asgen)
 
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
 add_executable(asgen
     Puzzle.cpp
     Solver.cpp
@@ -8,8 +11,8 @@ add_executable(asgen
     StatePtr.cpp
 )
 
-target_compile_features(asgen PUBLIC cxx_std_17)
 target_compile_options(asgen PUBLIC
+    -O3
     -Wall
     -Wextra
     -Wno-unused-parameter

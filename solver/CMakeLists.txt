@@ -4,6 +4,14 @@ project(asgen)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    message(STATUS "Defaulting to Release build")
+    set(CMAKE_BUILD_TYPE "Release"
+        CACHE STRING "Choose the type of build"
+        FORCE
+    )
+endif()
+
 add_executable(asgen
     Puzzle.cpp
     Solver.cpp
@@ -11,7 +19,7 @@ add_executable(asgen
 )
 
 target_compile_options(asgen PUBLIC
-    -O3
+    $<$<CONFIG:Debug>:-Og>
     -Wall
     -Wextra
     -Wno-unused-parameter

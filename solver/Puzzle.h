@@ -56,7 +56,7 @@ class Puzzle
                 std::unique_ptr<State> moveBlock(int dx, int dy);
 
                 State* parent;
-                unsigned short pickup_flags; 
+                unsigned short pickup_flags;
                 unsigned char player_x;
                 unsigned char player_y;
                 unsigned char block_x;

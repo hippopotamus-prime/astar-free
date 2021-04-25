@@ -155,8 +155,9 @@ unsigned int Puzzle::solve(ostream& out)
     do
     {
         auto first_open_node = open.extract(open.begin());
-        current_state = first_open_node.value().get();
-        closed.insert(std::move(first_open_node.value()));
+        auto [closed_node_it, insert_success] =
+            closed.insert(std::move(first_open_node.value()));
+        current_state = closed_node_it->get();
 
         if(current_state->distanceFromStart() > max_moves)
         {

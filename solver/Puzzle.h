@@ -37,7 +37,7 @@ class Puzzle
             public:
                 State(unsigned char px, unsigned char py,
                     unsigned char bx, unsigned char by,
-                    unsigned short pf, State* ptr,
+                    unsigned short pf, const State* parent_ptr,
                     unsigned char m);
                 bool operator<(const State& rhs) const;
                 bool operator==(const State& rhs) const;
@@ -46,16 +46,16 @@ class Puzzle
                 bool isFinished() const;
                 unsigned char distanceToFinish() const;
                 unsigned char distanceFromStart() const;
-                std::vector<std::unique_ptr<State>> expand();
-                State* getParent() const;
+                std::vector<std::unique_ptr<State>> expand() const;
+                const State* getParent() const;
                 bool hasParent() const;       
 
             private:
-                std::unique_ptr<State> newChild();
-                std::unique_ptr<State> movePlayer(int dx, int dy);
-                std::unique_ptr<State> moveBlock(int dx, int dy);
+                std::unique_ptr<State> newChild() const;
+                std::unique_ptr<State> movePlayer(int dx, int dy) const;
+                std::unique_ptr<State> moveBlock(int dx, int dy) const;
 
-                State* parent;
+                const State* parent;
                 unsigned short pickup_flags;
                 unsigned char player_x;
                 unsigned char player_y;

@@ -41,15 +41,15 @@ size_t hash_value(const Puzzle::State& state)
 
 
 Puzzle::State::State(unsigned char px, unsigned char py,
-unsigned char bx, unsigned char by, unsigned short pf,
-State* ptr, unsigned char m):
-parent(ptr),
-pickup_flags(pf),
-player_x(px),
-player_y(py),
-block_x(bx),
-block_y(by),
-moves(m)
+        unsigned char bx, unsigned char by, unsigned short pf,
+        const State* parent_ptr, unsigned char m):
+    parent(parent_ptr),
+    pickup_flags(pf),
+    player_x(px),
+    player_y(py),
+    block_x(bx),
+    block_y(by),
+    moves(m)
 {
     //no code
 }
@@ -119,7 +119,7 @@ bool Puzzle::State::hasParent() const
 }
 
 
-Puzzle::State* Puzzle::State::getParent() const
+const Puzzle::State* Puzzle::State::getParent() const
 {
     return parent;
 }
@@ -182,7 +182,7 @@ bool Puzzle::State::isFinished() const
 }
 
 
-vector<unique_ptr<Puzzle::State>> Puzzle::State::expand()
+vector<unique_ptr<Puzzle::State>> Puzzle::State::expand() const
 {
     vector<unique_ptr<State>> new_states;
 
@@ -200,7 +200,7 @@ vector<unique_ptr<Puzzle::State>> Puzzle::State::expand()
 }
 
 
-std::unique_ptr<Puzzle::State> Puzzle::State::movePlayer(int dx, int dy)
+std::unique_ptr<Puzzle::State> Puzzle::State::movePlayer(int dx, int dy) const
 {
     auto newState = newChild();
 
@@ -222,7 +222,7 @@ std::unique_ptr<Puzzle::State> Puzzle::State::movePlayer(int dx, int dy)
 }
 
 
-std::unique_ptr<Puzzle::State> Puzzle::State::moveBlock(int dx, int dy)
+std::unique_ptr<Puzzle::State> Puzzle::State::moveBlock(int dx, int dy) const
 {
     auto newState = newChild();
 
@@ -247,7 +247,7 @@ std::unique_ptr<Puzzle::State> Puzzle::State::moveBlock(int dx, int dy)
 }
 
 
-std::unique_ptr<Puzzle::State> Puzzle::State::newChild()
+std::unique_ptr<Puzzle::State> Puzzle::State::newChild() const
 {
     return std::make_unique<State>(player_x, player_y,
         block_x, block_y, pickup_flags, this, moves+1);

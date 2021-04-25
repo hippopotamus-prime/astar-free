@@ -151,7 +151,7 @@ unsigned int Puzzle::solve(ostream& out)
 
     open.insert(makeStartState());
 
-    State* current_state;
+    const State* current_state;
     do
     {
         auto first_open_node = open.extract(open.begin());
@@ -184,7 +184,7 @@ unsigned int Puzzle::solve(ostream& out)
     }
     else
     {
-        stack<State*> staq;
+        stack<const State*> staq;
 
         staq.push(current_state);
         while(current_state->hasParent())

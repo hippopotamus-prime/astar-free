@@ -23,8 +23,9 @@
 #define PUZZLE_
 
 #include <iostream>
-#include <list>
+#include <vector>
 #include <unordered_set>
+#include <memory>
 
 class Puzzle
 {
@@ -45,15 +46,15 @@ class Puzzle
                 bool isFinished() const;
                 unsigned char distanceToFinish() const;
                 unsigned char distanceFromStart() const;
-                std::list<State*> expand();
+                std::vector<std::unique_ptr<State>> expand();
                 State* getParent() const;
                 bool hasParent() const;       
 
             private:
-                State* newChild();
-                State* movePlayer(int dx, int dy);
-                State* moveBlock(int dx, int dy);
-        
+                std::unique_ptr<State> newChild();
+                std::unique_ptr<State> movePlayer(int dx, int dy);
+                std::unique_ptr<State> moveBlock(int dx, int dy);
+
                 State* parent;
                 unsigned short pickup_flags; 
                 unsigned char player_x;
@@ -69,7 +70,7 @@ class Puzzle
             std::ostream& out = std::cout);
 
     private:
-        static State* getStartState();
+        static std::unique_ptr<State> makeStartState();
 
         static int map[10][16];
         static unsigned short rmasks[16];

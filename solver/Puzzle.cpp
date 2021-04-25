@@ -23,7 +23,6 @@
 #include <string>
 #include <stack>
 #include <set>
-#include <unordered_set>
 #include "Puzzle.h"
 
 using namespace std;
@@ -51,8 +50,8 @@ namespace
 
 struct StatePtrLess
 {
-    bool operator() (const Puzzle::State* p1,
-        const Puzzle::State* p2) const
+    bool operator() (const std::unique_ptr<Puzzle::State>& p1,
+        const std::unique_ptr<Puzzle::State>& p2) const
     {
         return *p1 < *p2;
     }
@@ -60,8 +59,8 @@ struct StatePtrLess
 
 struct StatePtrEqual
 {
-    bool operator() (const Puzzle::State* p1,
-        const Puzzle::State* p2) const
+    bool operator() (const std::unique_ptr<Puzzle::State>& p1,
+        const std::unique_ptr<Puzzle::State>& p2) const
     {
         return *p1 == *p2;
     }
@@ -69,7 +68,7 @@ struct StatePtrEqual
 
 struct StatePtrHash
 {
-    size_t operator() (const Puzzle::State* ptr) const
+    size_t operator() (const std::unique_ptr<Puzzle::State>& ptr) const
     {
         return hash_value(*ptr);
     }
@@ -136,55 +135,47 @@ void Puzzle::init(istream& input)
 }
 
 
-Puzzle::State* Puzzle::getStartState()
+std::unique_ptr<Puzzle::State> Puzzle::makeStartState()
 {
-    State* start = new State(player_start_x, player_start_y,
-                       block_start_x, block_start_y,
-                       pickup_start_flags, NULL, 0);
-
-    return start;
+    return std::make_unique<State>(player_start_x, player_start_y,
+        block_start_x, block_start_y,
+        pickup_start_flags, nullptr, 0);
 }
-
 
 
 unsigned int Puzzle::solve(ostream& out)
 {
-    unordered_set<State*, StatePtrHash, StatePtrEqual> closed;
-    set<State*, StatePtrLess> open;
-    State* current = getStartState();
+    unordered_set<std::unique_ptr<State>, StatePtrHash, StatePtrEqual> closed;
+    set<std::unique_ptr<State>, StatePtrLess> open;
     unsigned char max_moves = 0;
 
-    open.insert(current);
+    open.insert(makeStartState());
 
+    State* current_state;
     do
     {
-        current = *open.begin();
-        open.erase(open.begin());
-        closed.insert(current);
+        auto first_open_node = open.extract(open.begin());
+        current_state = first_open_node.value().get();
+        closed.insert(std::move(first_open_node.value()));
 
-        if(current->distanceFromStart() > max_moves)
+        if(current_state->distanceFromStart() > max_moves)
         {
-            max_moves = current->distanceFromStart();
+            max_moves = current_state->distanceFromStart();
             //cout << (int)max_moves << endl;
         }
 
-        list<State*> more = current->expand();
-        
-        for(list<State*>::iterator it = more.begin();
-        it != more.end(); ++it)
+        auto successor_states = current_state->expand();
+
+        for (auto& state_ptr: successor_states)
         {
-            if((closed.find(*it) == closed.end())
-            && (open.find(*it) == open.end()))
+            if ((closed.find(state_ptr) == closed.end())
+            &&  (open.find(state_ptr) == open.end()))
             {
-                open.insert(*it);
-            }
-            else
-            {
-                delete *it;
+                open.insert(std::move(state_ptr));
             }
         }
     }
-    while(!current->isFinished() && !open.empty());
+    while(!current_state->isFinished() && !open.empty());
 
     if(open.empty())
     {
@@ -194,11 +185,11 @@ unsigned int Puzzle::solve(ostream& out)
     {
         stack<State*> staq;
 
-        staq.push(current);
-        while(current->hasParent())
+        staq.push(current_state);
+        while(current_state->hasParent())
         {
-            current = current->getParent();
-            staq.push(current);
+            current_state = current_state->getParent();
+            staq.push(current_state);
         }
 
         printAsm(staq.size()-1, out);
@@ -214,18 +205,6 @@ unsigned int Puzzle::solve(ostream& out)
             staq.pop();
         }
     }
-
-
-    //Clean up......
-    for (auto& state_ptr: open)
-    {
-        delete state_ptr;
-    }
-
-    for (auto& state_ptr: closed)
-    {
-        delete state_ptr;
-    } 
 
     return 0;
 }

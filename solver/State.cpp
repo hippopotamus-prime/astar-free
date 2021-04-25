@@ -182,28 +182,27 @@ bool Puzzle::State::isFinished() const
 }
 
 
-list<Puzzle::State*> Puzzle::State::expand()
+vector<unique_ptr<Puzzle::State>> Puzzle::State::expand()
 {
-    list<State*> list;
+    vector<unique_ptr<State>> new_states;
 
-    list.push_front(movePlayer(1, 0));
-    list.push_front(movePlayer(0, 1));
-    list.push_front(movePlayer(-1, 0));
-    list.push_front(movePlayer(0, -1));
+    new_states.push_back(moveBlock(0, -1));
+    new_states.push_back(moveBlock(-1, 0));
+    new_states.push_back(moveBlock(0, 1));
+    new_states.push_back(moveBlock(1, 0));
 
-    list.push_front(moveBlock(1, 0));
-    list.push_front(moveBlock(0, 1));
-    list.push_front(moveBlock(-1, 0));
-    list.push_front(moveBlock(0, -1));
+    new_states.push_back(movePlayer(0, -1));
+    new_states.push_back(movePlayer(-1, 0));
+    new_states.push_back(movePlayer(0, 1));
+    new_states.push_back(movePlayer(1, 0));
 
-    return list;
+    return new_states;
 }
 
 
-
-Puzzle::State* Puzzle::State::movePlayer(int dx, int dy)
+std::unique_ptr<Puzzle::State> Puzzle::State::movePlayer(int dx, int dy)
 {
-    State* newState = newChild();
+    auto newState = newChild();
 
     int tile = map[newState->player_y + dy][newState->player_x + dx];
 
@@ -223,9 +222,9 @@ Puzzle::State* Puzzle::State::movePlayer(int dx, int dy)
 }
 
 
-Puzzle::State* Puzzle::State::moveBlock(int dx, int dy)
+std::unique_ptr<Puzzle::State> Puzzle::State::moveBlock(int dx, int dy)
 {
-    State* newState = newChild();
+    auto newState = newChild();
 
     int tile = map[newState->block_y + dy][newState->block_x + dx];
 
@@ -248,10 +247,8 @@ Puzzle::State* Puzzle::State::moveBlock(int dx, int dy)
 }
 
 
-Puzzle::State* Puzzle::State::newChild()
+std::unique_ptr<Puzzle::State> Puzzle::State::newChild()
 {
-    State* child = new State(player_x, player_y,
+    return std::make_unique<State>(player_x, player_y,
         block_x, block_y, pickup_flags, this, moves+1);
-
-    return child;
 }

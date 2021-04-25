@@ -63,20 +63,6 @@ class Puzzle
                 unsigned char moves;
         };
 
-        class StatePtr
-        {
-            friend size_t hash_value(const StatePtr& state);
-
-            public:
-                StatePtr(State* ptr);
-                bool operator<(const StatePtr& rhs) const;
-                bool operator==(const StatePtr& rhs) const;
-                State* toPointer() const;
-
-            private:
-                State* m_ptr;
-        };
-
         static void init(std::istream& input);
         static unsigned int solve(std::ostream& out = std::cout);    
         static void printAsm(unsigned int moves_to_finish,
@@ -96,21 +82,5 @@ class Puzzle
         static unsigned char block_start_y;
   
 };
-
-
-namespace std
-{
-    template<> struct hash<Puzzle::StatePtr>
-    {
-        size_t operator()(const Puzzle::StatePtr& state) const
-        {
-            return hash_value(state);
-        }
-    };
-}
-
-
-
-
 
 #endif

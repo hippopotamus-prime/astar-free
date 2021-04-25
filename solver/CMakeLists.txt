@@ -8,7 +8,6 @@ add_executable(asgen
     Puzzle.cpp
     Solver.cpp
     State.cpp
-    StatePtr.cpp
 )
 
 target_compile_options(asgen PUBLIC

@@ -46,6 +46,37 @@ const string NUSIZ_TWO_FAR      = "4";
 const string NUSIZ_THREE_CLOSE  = "3";
 const string NUSIZ_THREE_MED    = "6";
 
+namespace
+{
+
+struct StatePtrLess
+{
+    bool operator() (const Puzzle::State* p1,
+        const Puzzle::State* p2) const
+    {
+        return *p1 < *p2;
+    }
+};
+
+struct StatePtrEqual
+{
+    bool operator() (const Puzzle::State* p1,
+        const Puzzle::State* p2) const
+    {
+        return *p1 == *p2;
+    }
+};
+
+struct StatePtrHash
+{
+    size_t operator() (const Puzzle::State* ptr) const
+    {
+        return hash_value(*ptr);
+    }
+};
+
+}
+
 void Puzzle::init(istream& input)
 {
     unsigned int pickups = 0;
@@ -115,10 +146,11 @@ Puzzle::State* Puzzle::getStartState()
 }
 
 
+
 unsigned int Puzzle::solve(ostream& out)
 {
-    unordered_set<StatePtr> closed;
-    set<StatePtr> open;
+    unordered_set<State*, StatePtrHash, StatePtrEqual> closed;
+    set<State*, StatePtrLess> open;
     State* current = getStartState();
     unsigned char max_moves = 0;
 
@@ -126,7 +158,7 @@ unsigned int Puzzle::solve(ostream& out)
 
     do
     {
-        current = (*open.begin()).toPointer();
+        current = *open.begin();
         open.erase(open.begin());
         closed.insert(current);
 
@@ -187,12 +219,12 @@ unsigned int Puzzle::solve(ostream& out)
     //Clean up......
     for (auto& state_ptr: open)
     {
-        delete state_ptr.toPointer();
+        delete state_ptr;
     }
 
     for (auto& state_ptr: closed)
     {
-        delete state_ptr.toPointer();
+        delete state_ptr;
     } 
 
     return 0;

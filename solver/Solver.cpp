@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
         in = &input;
     }
 
-    Puzzle::init(*in);
-
-    Puzzle::solve(*out);
+    Puzzle puzzle;
+    puzzle.init(*in);
+    return puzzle.solve(*out);
 }

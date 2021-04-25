@@ -19,15 +19,14 @@
 ** Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 ****************************************************************************/
 
-using namespace std;
-
 #include <list>
 #include <iostream>
+#include "State.h"
 #include "Puzzle.h"
 
+using namespace std;
 
-
-size_t hash_value(const Puzzle::State& state)
+size_t hash_value(const State& state)
 {
     size_t result = (unsigned int)(state.pickup_flags);
     result += (unsigned int)(state.player_x) * 37;
@@ -40,9 +39,11 @@ size_t hash_value(const Puzzle::State& state)
 
 
 
-Puzzle::State::State(unsigned char px, unsigned char py,
+State::State(const Puzzle& _puzzle,
+        unsigned char px, unsigned char py,
         unsigned char bx, unsigned char by, unsigned short pf,
         const State* parent_ptr, unsigned char m):
+    puzzle(_puzzle),
     parent(parent_ptr),
     pickup_flags(pf),
     player_x(px),
@@ -55,7 +56,7 @@ Puzzle::State::State(unsigned char px, unsigned char py,
 }
 
 
-void Puzzle::State::print(ostream& out) const
+void State::print(ostream& out) const
 {
     out << "player (" << (int)player_x
         << "," << (int)player_y << ")\t"
@@ -64,7 +65,7 @@ void Puzzle::State::print(ostream& out) const
 }
 
 
-bool Puzzle::State::operator==(const State& rhs) const
+bool State::operator==(const State& rhs) const
 {
     return (this->player_x == rhs.player_x)
         && (this->player_y == rhs.player_y)
@@ -74,7 +75,7 @@ bool Puzzle::State::operator==(const State& rhs) const
 }
 
 
-bool Puzzle::State::operator<(const State& rhs) const
+bool State::operator<(const State& rhs) const
 {
     bool result;
 
@@ -113,25 +114,25 @@ bool Puzzle::State::operator<(const State& rhs) const
 }
 
 
-bool Puzzle::State::hasParent() const
+bool State::hasParent() const
 {
     return parent != NULL;
 }
 
 
-const Puzzle::State* Puzzle::State::getParent() const
+const State* State::getParent() const
 {
     return parent;
 }
 
 
-unsigned char Puzzle::State::distanceFromStart() const
+unsigned char State::distanceFromStart() const
 {
     return moves;
 }
 
 
-unsigned char Puzzle::State::distanceToFinish() const
+unsigned char State::distanceToFinish() const
 {
     unsigned short rows = 0;
     unsigned short columns = 0;
@@ -142,9 +143,9 @@ unsigned char Puzzle::State::distanceToFinish() const
     {
         if(pickups & 1)
         {
-            rows |= rmasks[i];
-            columns |= cmasks[i];
-        }        
+            rows |= puzzle.getRowMask(i);
+            columns |= puzzle.getColumnMask(i);
+        }
 
         ++i;
         pickups >>= 1;
@@ -176,13 +177,13 @@ unsigned char Puzzle::State::distanceToFinish() const
 }
 
 
-bool Puzzle::State::isFinished() const
+bool State::isFinished() const
 {
     return (pickup_flags == 0);
 }
 
 
-vector<unique_ptr<Puzzle::State>> Puzzle::State::expand() const
+vector<unique_ptr<State>> State::expand() const
 {
     vector<unique_ptr<State>> new_states;
 
@@ -200,11 +201,11 @@ vector<unique_ptr<Puzzle::State>> Puzzle::State::expand() const
 }
 
 
-std::unique_ptr<Puzzle::State> Puzzle::State::movePlayer(int dx, int dy) const
+std::unique_ptr<State> State::movePlayer(int dx, int dy) const
 {
     auto newState = newChild();
 
-    int tile = map[newState->player_y + dy][newState->player_x + dx];
+    int tile = puzzle.getTile(newState->player_x + dx, newState->player_y + dy);
 
     while((tile != -1)
     && !((newState->player_x + dx == newState->block_x)
@@ -215,18 +216,18 @@ std::unique_ptr<Puzzle::State> Puzzle::State::movePlayer(int dx, int dy) const
         newState->player_x += dx;
         newState->player_y += dy;
 
-        tile = map[newState->player_y + dy][newState->player_x + dx];
+        tile = puzzle.getTile(newState->player_x + dx, newState->player_y + dy);
     }
 
     return newState;
 }
 
 
-std::unique_ptr<Puzzle::State> Puzzle::State::moveBlock(int dx, int dy) const
+std::unique_ptr<State> State::moveBlock(int dx, int dy) const
 {
     auto newState = newChild();
 
-    int tile = map[newState->block_y + dy][newState->block_x + dx];
+    int tile = puzzle.getTile(newState->block_x + dx, newState->block_y + dy);
 
     while((tile != -1)
     && !((newState->block_x + dx == newState->player_x)
@@ -240,15 +241,19 @@ std::unique_ptr<Puzzle::State> Puzzle::State::moveBlock(int dx, int dy) const
         newState->block_y += dy;
         newState->block_x += dx;
 
-        tile = map[newState->block_y + dy][newState->block_x + dx];
+        tile = puzzle.getTile(newState->block_x + dx, newState->block_y + dy);
     }
 
     return newState;
 }
 
 
-std::unique_ptr<Puzzle::State> Puzzle::State::newChild() const
+std::unique_ptr<State> State::newChild() const
 {
-    return std::make_unique<State>(player_x, player_y,
-        block_x, block_y, pickup_flags, this, moves+1);
+    return std::make_unique<State>(puzzle,
+        player_x, player_y,
+        block_x, block_y,
+        pickup_flags,
+        this,
+        moves + 1);
 }

@@ -23,19 +23,11 @@
 #include <string>
 #include <stack>
 #include <set>
+#include <cstring>
 #include "Puzzle.h"
+#include "State.h"
 
 using namespace std;
-
-int Puzzle::map[10][16];
-unsigned short Puzzle::rmasks[16];
-unsigned short Puzzle::cmasks[16];
-
-unsigned short Puzzle::pickup_start_flags;
-unsigned char Puzzle::player_start_x;
-unsigned char Puzzle::player_start_y;
-unsigned char Puzzle::block_start_x;
-unsigned char Puzzle::block_start_y;
 
 const string NUSIZ_OFF          = "5";
 const string NUSIZ_ONE          = "0";
@@ -50,8 +42,8 @@ namespace
 
 struct StatePtrLess
 {
-    bool operator() (const std::unique_ptr<Puzzle::State>& p1,
-        const std::unique_ptr<Puzzle::State>& p2) const
+    bool operator() (const std::unique_ptr<State>& p1,
+        const std::unique_ptr<State>& p2) const
     {
         return *p1 < *p2;
     }
@@ -59,8 +51,8 @@ struct StatePtrLess
 
 struct StatePtrEqual
 {
-    bool operator() (const std::unique_ptr<Puzzle::State>& p1,
-        const std::unique_ptr<Puzzle::State>& p2) const
+    bool operator() (const std::unique_ptr<State>& p1,
+        const std::unique_ptr<State>& p2) const
     {
         return *p1 == *p2;
     }
@@ -68,7 +60,7 @@ struct StatePtrEqual
 
 struct StatePtrHash
 {
-    size_t operator() (const std::unique_ptr<Puzzle::State>& ptr) const
+    size_t operator() (const std::unique_ptr<State>& ptr) const
     {
         return hash_value(*ptr);
     }
@@ -83,6 +75,10 @@ void Puzzle::init(istream& input)
 
     unsigned int i, j;
     unsigned int char_count = 0;
+
+    memset(map, 0, sizeof(map));
+    memset(cmasks, 0, sizeof(cmasks));
+    memset(rmasks, 0, sizeof(rmasks));
 
     while(char_count < 160)
     {
@@ -135,15 +131,16 @@ void Puzzle::init(istream& input)
 }
 
 
-std::unique_ptr<Puzzle::State> Puzzle::makeStartState()
+std::unique_ptr<State> Puzzle::makeStartState() const
 {
-    return std::make_unique<State>(player_start_x, player_start_y,
+    return std::make_unique<State>(*this,
+        player_start_x, player_start_y,
         block_start_x, block_start_y,
         pickup_start_flags, nullptr, 0);
 }
 
 
-unsigned int Puzzle::solve(ostream& out)
+unsigned int Puzzle::solve(ostream& out) const
 {
     unordered_set<std::unique_ptr<State>, StatePtrHash, StatePtrEqual> closed;
     set<std::unique_ptr<State>, StatePtrLess> open;
@@ -211,8 +208,7 @@ unsigned int Puzzle::solve(ostream& out)
 }
 
 
-
-void Puzzle::printAsm(unsigned int moves_to_finish, ostream& out)
+void Puzzle::printAsm(unsigned int moves_to_finish, ostream& out) const
 {
     int i, j;
 

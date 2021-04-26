@@ -91,7 +91,7 @@ bool State::operator==(const State& rhs) const
 
 bool State::hasParent() const
 {
-    return parent != NULL;
+    return parent != nullptr;
 }
 
 

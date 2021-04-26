@@ -38,21 +38,35 @@ size_t hash_value(const State& state)
 }
 
 
-
 State::State(const Puzzle& _puzzle,
         unsigned char px, unsigned char py,
-        unsigned char bx, unsigned char by, unsigned short pf,
-        const State* parent_ptr, unsigned char m):
+        unsigned char bx, unsigned char by, unsigned short pf):
     puzzle(_puzzle),
+    parent(nullptr),
+    pickup_flags(pf),
+    player_x(px),
+    player_y(py),
+    block_x(bx),
+    block_y(by),
+    moves(0)
+{
+    updateValueForComparison();
+}
+
+
+State::State(const State* parent_ptr,
+        unsigned char px, unsigned char py,
+        unsigned char bx, unsigned char by, unsigned short pf):
+    puzzle(parent_ptr->puzzle),
     parent(parent_ptr),
     pickup_flags(pf),
     player_x(px),
     player_y(py),
     block_x(bx),
     block_y(by),
-    moves(m)
+    moves(parent_ptr->moves + 1)
 {
-    //no code
+    updateValueForComparison();
 }
 
 
@@ -72,45 +86,6 @@ bool State::operator==(const State& rhs) const
         && (this->block_x == rhs.block_x)
         && (this->block_y == rhs.block_y)
         && (this->pickup_flags == rhs.pickup_flags);
-}
-
-
-bool State::operator<(const State& rhs) const
-{
-    bool result;
-
-    if(this->moves + this->distanceToFinish() !=
-    rhs.moves + rhs.distanceToFinish())
-    {
-        result = (this->moves + this->distanceToFinish() <
-            rhs.moves + rhs.distanceToFinish());
-    }
-    else if(this->pickup_flags != rhs.pickup_flags)
-    {
-        result = (this->pickup_flags < rhs.pickup_flags);
-    }
-    else if(this->player_x != rhs.player_x)
-    {
-        result = (this->player_x < rhs.player_x);
-    }
-    else if(this->player_y != rhs.player_y)
-    {
-        result = (this->player_y < rhs.player_y);
-    }
-    else if(this->block_x != rhs.block_x)
-    {
-        result = (this->block_x < rhs.block_x);
-    }
-    else if(this->block_y != rhs.block_y)
-    {
-        result = (this->block_y < rhs.block_y);
-    }
-    else //they're the same
-    {
-        result = false;
-    }
-
-    return result;
 }
 
 
@@ -160,6 +135,7 @@ unsigned char State::distanceToFinish() const
         rows >>= 1;
     }
 
+    // FIX ME: column_count is always 0; should test columns here
     while(column_count != 0)
     {
         ++column_count;
@@ -203,57 +179,80 @@ vector<unique_ptr<State>> State::expand() const
 
 std::unique_ptr<State> State::movePlayer(int dx, int dy) const
 {
-    auto newState = newChild();
+    auto new_player_x = player_x;
+    auto new_player_y = player_y;
+    auto new_pickup_flags = pickup_flags;
 
-    int tile = puzzle.getTile(newState->player_x + dx, newState->player_y + dy);
-
-    while((tile != -1)
-    && !((newState->player_x + dx == newState->block_x)
-        && (newState->player_y + dy == newState->block_y)))
+    while (true)
     {
-        newState->pickup_flags &= ~tile;   
+        auto candidate_player_x = new_player_x + dx;
+        auto candidate_player_y = new_player_y + dy;
 
-        newState->player_x += dx;
-        newState->player_y += dy;
+        if ((candidate_player_x == block_x)
+        &&  (candidate_player_y == block_y))
+            break;
 
-        tile = puzzle.getTile(newState->player_x + dx, newState->player_y + dy);
+        auto tile = puzzle.getTile(candidate_player_x, candidate_player_y);
+        if (tile == -1)
+            break;
+
+        new_pickup_flags &= ~tile;
+        new_player_x = candidate_player_x;
+        new_player_y = candidate_player_y;
     }
 
-    return newState;
+    return std::make_unique<State>(this,
+        new_player_x, new_player_y,
+        block_x, block_y,
+        new_pickup_flags);
 }
 
 
 std::unique_ptr<State> State::moveBlock(int dx, int dy) const
 {
-    auto newState = newChild();
+    auto new_block_x = block_x;
+    auto new_block_y = block_y;
 
-    int tile = puzzle.getTile(newState->block_x + dx, newState->block_y + dy);
-
-    while((tile != -1)
-    && !((newState->block_x + dx == newState->player_x)
-        && (newState->block_y + dy == newState->player_y)))
+    while (true)
     {
-        if((tile) && (newState->pickup_flags & tile))
-        {
+        auto candidate_block_x = new_block_x + dx;
+        auto candidate_block_y = new_block_y + dy;
+
+        if ((candidate_block_x == player_x)
+        &&  (candidate_block_y == player_y))
             break;
-        }
 
-        newState->block_y += dy;
-        newState->block_x += dx;
+        auto tile = puzzle.getTile(candidate_block_x, candidate_block_y);
+        if (tile == -1)
+            break;
+        if (pickup_flags & tile)
+            break;
 
-        tile = puzzle.getTile(newState->block_x + dx, newState->block_y + dy);
+        new_block_x = candidate_block_x;
+        new_block_y = candidate_block_y;
     }
 
-    return newState;
+    return std::make_unique<State>(this,
+        player_x, player_y,
+        new_block_x, new_block_y,
+        pickup_flags);
 }
 
 
-std::unique_ptr<State> State::newChild() const
+void State::updateValueForComparison()
 {
-    return std::make_unique<State>(puzzle,
-        player_x, player_y,
-        block_x, block_y,
-        pickup_flags,
-        this,
-        moves + 1);
+    // Pre-compute a value to support fast comparisons with operator<. This
+    // makes std::set much faster, but requires that states are immutable.
+
+    value_for_comparison = moves + distanceToFinish();
+    value_for_comparison <<= 16;
+    value_for_comparison += pickup_flags;
+    value_for_comparison <<= 8;
+    value_for_comparison += player_x;
+    value_for_comparison <<= 8;
+    value_for_comparison += player_y;
+    value_for_comparison <<= 8;
+    value_for_comparison += block_x;
+    value_for_comparison <<= 8;
+    value_for_comparison += block_y;
 }

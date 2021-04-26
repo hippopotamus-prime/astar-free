@@ -136,7 +136,7 @@ std::unique_ptr<State> Puzzle::makeStartState() const
     return std::make_unique<State>(*this,
         player_start_x, player_start_y,
         block_start_x, block_start_y,
-        pickup_start_flags, nullptr, 0);
+        pickup_start_flags);
 }
 
 

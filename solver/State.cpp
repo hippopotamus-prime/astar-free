@@ -114,8 +114,8 @@ unsigned char State::distanceToFinish() const
     // columns with pickups present, whichever is smaller. (Given a clear
     // path, you can clear an entire row in one move.)
 
-    unsigned short rows = 0;
-    unsigned short columns = 0;
+    unsigned short row_flags = 0;
+    unsigned short column_flags = 0;
     unsigned short pickups = pickup_flags;
     unsigned int i = 0;
 
@@ -123,37 +123,34 @@ unsigned char State::distanceToFinish() const
     {
         if (pickups & 1)
         {
-            rows |= puzzle.getRowMask(i);
-            columns |= puzzle.getColumnMask(i);
+            row_flags |= puzzle.getRowMask(i);
+            column_flags |= puzzle.getColumnMask(i);
         }
 
         ++i;
         pickups >>= 1;
     }
 
+    // TO DO: Use std::popcount when C++20 is available.
+#ifdef __GNUC__
+    auto row_count = __builtin_popcount(row_flags);
+    auto column_count = __builtin_popcount(column_flags);
+#else
     unsigned int row_count = 0;
     unsigned int column_count = 0;
+    while (row_flags != 0)
+    {
+        row_count += (row_flags & 1);
+        row_flags >>= 1;
+    }
+    while (column_flags != 0)
+    {
+        column_count += (column_flags & 1);
+        column_flags >>= 1;
+    }
+#endif
 
-    while (rows != 0)
-    {
-        row_count += (rows & 1);
-        rows >>= 1;
-    }
-
-    while (columns != 0)
-    {
-        column_count += (columns & 1);
-        columns >>= 1;
-    }
-
-    if (row_count < column_count)
-    {
-        return row_count;
-    }
-    else
-    {
-        return column_count;
-    }
+    return std::min(row_count, column_count);
 }
 
 

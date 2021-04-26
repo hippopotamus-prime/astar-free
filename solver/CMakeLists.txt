@@ -20,6 +20,7 @@ add_executable(asgen
 
 target_compile_options(asgen PUBLIC
     $<$<CONFIG:Debug>:-Og>
+    $<$<CONFIG:Release>:-march=native>
     -Wall
     -Wextra
     -Wno-unused-parameter

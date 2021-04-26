@@ -40,16 +40,16 @@ class Puzzle
         int getTile(unsigned int x, unsigned int y) const
             {return map[y][x];}
         unsigned short getRowMask(unsigned int index) const
-            {return rmasks[index];}
+            {return row_masks[index];}
         unsigned short getColumnMask(unsigned int index) const
-            {return cmasks[index];}
+            {return column_masks[index];}
 
     private:
         std::unique_ptr<State> makeStartState() const;
 
         int map[10][16];
-        unsigned short rmasks[16];
-        unsigned short cmasks[16];
+        unsigned short row_masks[16];
+        unsigned short column_masks[16];
 
         unsigned short pickup_start_flags;
         unsigned char player_start_x;

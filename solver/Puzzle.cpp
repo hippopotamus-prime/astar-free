@@ -77,8 +77,8 @@ void Puzzle::init(istream& input)
     unsigned int char_count = 0;
 
     memset(map, 0, sizeof(map));
-    memset(cmasks, 0, sizeof(cmasks));
-    memset(rmasks, 0, sizeof(rmasks));
+    memset(column_masks, 0, sizeof(column_masks));
+    memset(row_masks, 0, sizeof(row_masks));
 
     while(char_count < 160)
     {
@@ -102,8 +102,8 @@ void Puzzle::init(istream& input)
             case 'o':
                 map[j][i] = 1 << pickups;
                 pickup_start_flags |= 1 << pickups;
-                rmasks[pickups] = 1 << i;
-                cmasks[pickups++] = 1 << j;
+                column_masks[pickups] = 1 << i;
+                row_masks[pickups++] = 1 << j;
                 ++char_count;
                 break;
 

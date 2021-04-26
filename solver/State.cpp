@@ -109,14 +109,19 @@ unsigned char State::distanceFromStart() const
 
 unsigned char State::distanceToFinish() const
 {
+    // This is the A* heuristic function - it estimates the minimum number
+    // of moves to finish the puzzle as either the number of unique rows or
+    // columns with pickups present, whichever is smaller. (Given a clear
+    // path, you can clear an entire row in one move.)
+
     unsigned short rows = 0;
     unsigned short columns = 0;
     unsigned short pickups = pickup_flags;
     unsigned int i = 0;
 
-    while(pickups != 0)
+    while (pickups != 0)
     {
-        if(pickups & 1)
+        if (pickups & 1)
         {
             rows |= puzzle.getRowMask(i);
             columns |= puzzle.getColumnMask(i);
@@ -129,26 +134,25 @@ unsigned char State::distanceToFinish() const
     unsigned int row_count = 0;
     unsigned int column_count = 0;
 
-    while(rows != 0)
+    while (rows != 0)
     {
-        ++row_count;
+        row_count += (rows & 1);
         rows >>= 1;
     }
 
-    // FIX ME: column_count is always 0; should test columns here
-    while(column_count != 0)
+    while (columns != 0)
     {
-        ++column_count;
+        column_count += (columns & 1);
         columns >>= 1;
     }
 
-    if(row_count < column_count)
+    if (row_count < column_count)
     {
-        return 2*row_count - 1;
+        return row_count;
     }
     else
     {
-        return 2*column_count - 1;
+        return column_count;
     }
 }
 

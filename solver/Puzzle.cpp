@@ -162,10 +162,7 @@ unsigned int Puzzle::solve(ostream& out) const
             if (closed.find(state_ptr) == closed.end())
             {
                 auto key = state_ptr->getSortKey();
-                if (open.find(key) == open.end())
-                {
-                    open.emplace(key, std::move(state_ptr));
-                }
+                open.try_emplace(key, std::move(state_ptr));
             }
         }
     }

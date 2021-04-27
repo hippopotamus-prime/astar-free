@@ -13,18 +13,18 @@ class State
     public:
         // Initial state constructor - no parent state.
         State(const Puzzle& puzzle,
-            unsigned char px, unsigned char py,
-            unsigned char bx, unsigned char by,
-            unsigned short pf);
+            unsigned char player_x, unsigned char player_y,
+            unsigned char block_x, unsigned char block_y,
+            unsigned short pickup_flags);
 
         // Constructor for child states.
         State(const State* parent_ptr,
-            unsigned char px, unsigned char py,
-            unsigned char bx, unsigned char by,
-            unsigned short pf);
+            unsigned char player_x, unsigned char player_y,
+            unsigned char block_x, unsigned char block_y,
+            unsigned short pickup_flags);
 
         bool operator<(const State& rhs) const
-            {return value_for_comparison < rhs.value_for_comparison;}
+            {return _value_for_comparison < rhs._value_for_comparison;}
         bool operator==(const State& rhs) const;
 
         void print(std::ostream& out) const;
@@ -40,15 +40,15 @@ class State
         std::unique_ptr<State> moveBlock(int dx, int dy) const;
         void updateValueForComparison();
 
-        const Puzzle& puzzle;
-        const State* parent;
-        unsigned long long value_for_comparison;
-        unsigned short pickup_flags;
-        unsigned char player_x;
-        unsigned char player_y;
-        unsigned char block_x;
-        unsigned char block_y;
-        unsigned char moves;
+        const Puzzle& _puzzle;
+        const State* _parent;
+        unsigned long long _value_for_comparison;
+        unsigned short _pickup_flags;
+        unsigned char _player_x;
+        unsigned char _player_y;
+        unsigned char _block_x;
+        unsigned char _block_y;
+        unsigned char _moves;
 };
 
 #endif

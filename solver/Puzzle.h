@@ -38,24 +38,24 @@ class Puzzle
             std::ostream& out = std::cout) const;
 
         int getTile(unsigned int x, unsigned int y) const
-            {return map[y][x];}
+            {return _map[y][x];}
         unsigned short getRowMask(unsigned int index) const
-            {return row_masks[index];}
+            {return _row_masks[index];}
         unsigned short getColumnMask(unsigned int index) const
-            {return column_masks[index];}
+            {return _column_masks[index];}
 
     private:
         std::unique_ptr<State> makeStartState() const;
 
-        int map[10][16];
-        unsigned short row_masks[16];
-        unsigned short column_masks[16];
+        int _map[10][16];
+        unsigned short _row_masks[16];
+        unsigned short _column_masks[16];
 
-        unsigned short pickup_start_flags;
-        unsigned char player_start_x;
-        unsigned char player_start_y;
-        unsigned char block_start_x;
-        unsigned char block_start_y;
+        unsigned short _pickup_start_flags;
+        unsigned char _player_start_x;
+        unsigned char _player_start_y;
+        unsigned char _block_start_x;
+        unsigned char _block_start_y;
 };
 
 #endif

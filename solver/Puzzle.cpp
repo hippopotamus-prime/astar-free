@@ -71,14 +71,14 @@ struct StatePtrHash
 void Puzzle::init(istream& input)
 {
     unsigned int pickups = 0;
-    pickup_start_flags = 0;
+    _pickup_start_flags = 0;
 
     unsigned int i, j;
     unsigned int char_count = 0;
 
-    memset(map, 0, sizeof(map));
-    memset(column_masks, 0, sizeof(column_masks));
-    memset(row_masks, 0, sizeof(row_masks));
+    memset(_map, 0, sizeof(_map));
+    memset(_column_masks, 0, sizeof(_column_masks));
+    memset(_row_masks, 0, sizeof(_row_masks));
 
     while(char_count < 160)
     {
@@ -93,31 +93,31 @@ void Puzzle::init(istream& input)
         {
             // Wall
             case 'W':
-                map[j][i] = -1;
+                _map[j][i] = -1;
                 ++char_count;
                 break;
 
             // Collectible
             case 'R':
             case 'o':
-                map[j][i] = 1 << pickups;
-                pickup_start_flags |= 1 << pickups;
-                column_masks[pickups] = 1 << i;
-                row_masks[pickups++] = 1 << j;
+                _map[j][i] = 1 << pickups;
+                _pickup_start_flags |= 1 << pickups;
+                _column_masks[pickups] = 1 << i;
+                _row_masks[pickups++] = 1 << j;
                 ++char_count;
                 break;
 
             // Player
             case 'P':
-                player_start_x = i;
-                player_start_y = j;
+                _player_start_x = i;
+                _player_start_y = j;
                 ++char_count;
                 break;
 
             // Block
             case 'B':
-                block_start_x = i;
-                block_start_y = j;
+                _block_start_x = i;
+                _block_start_y = j;
                 ++char_count;
                 break;
 
@@ -134,9 +134,9 @@ void Puzzle::init(istream& input)
 std::unique_ptr<State> Puzzle::makeStartState() const
 {
     return std::make_unique<State>(*this,
-        player_start_x, player_start_y,
-        block_start_x, block_start_y,
-        pickup_start_flags);
+        _player_start_x, _player_start_y,
+        _block_start_x, _block_start_y,
+        _pickup_start_flags);
 }
 
 
@@ -221,7 +221,7 @@ void Puzzle::printAsm(unsigned int moves_to_finish, ostream& out) const
 
         for(i = 0; i < 8; ++i)
         {
-            if(map[j][i] == -1)
+            if(_map[j][i] == -1)
             {
                 out << "1";
             }
@@ -235,7 +235,7 @@ void Puzzle::printAsm(unsigned int moves_to_finish, ostream& out) const
 
         for(i = 8; i < 16; ++i)
         {
-            if(map[j][i] == -1)
+            if(_map[j][i] == -1)
             {
                 out << "1";
             }
@@ -262,7 +262,7 @@ void Puzzle::printAsm(unsigned int moves_to_finish, ostream& out) const
 
         for(i = 0; i < 16; ++i)
         {
-            if(map[j][i] > 0)
+            if(_map[j][i] > 0)
             {
                 if(pickups_per_line < 3)
                 {
@@ -342,15 +342,15 @@ void Puzzle::printAsm(unsigned int moves_to_finish, ostream& out) const
 
     out << "\n"
         << "    COORD "
-        << (int) player_start_x
+        << (int) _player_start_x
         << ","
-        << (int) (9 - player_start_y)
+        << (int) (9 - _player_start_y)
         << "\n";
 
     out << "    COORD "
-        << (int) block_start_x
+        << (int) _block_start_x
         << ","
-        << (int) ( 9 - block_start_y)
+        << (int) ( 9 - _block_start_y)
         << "\n\n";
 
     out << "    .byte $"

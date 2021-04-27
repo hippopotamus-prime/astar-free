@@ -28,43 +28,45 @@ using namespace std;
 
 size_t hash_value(const State& state)
 {
-    size_t result = (unsigned int)(state.pickup_flags);
-    result += (unsigned int)(state.player_x) * 37;
-    result += (unsigned int)(state.player_y) * 37*37;
-    result += (unsigned int)(state.block_x) * 37*37*37;
-    result += (unsigned int)(state.block_y) * 37*37*37*37;
+    size_t result = (unsigned int)(state._pickup_flags);
+    result += (unsigned int)(state._player_x) * 37;
+    result += (unsigned int)(state._player_y) * 37*37;
+    result += (unsigned int)(state._block_x) * 37*37*37;
+    result += (unsigned int)(state._block_y) * 37*37*37*37;
 
     return result;
 }
 
 
-State::State(const Puzzle& _puzzle,
-        unsigned char px, unsigned char py,
-        unsigned char bx, unsigned char by, unsigned short pf):
-    puzzle(_puzzle),
-    parent(nullptr),
-    pickup_flags(pf),
-    player_x(px),
-    player_y(py),
-    block_x(bx),
-    block_y(by),
-    moves(0)
+State::State(const Puzzle& puzzle,
+        unsigned char player_x, unsigned char player_y,
+        unsigned char block_x, unsigned char block_y,
+        unsigned short pickup_flags):
+    _puzzle(puzzle),
+    _parent(nullptr),
+    _pickup_flags(pickup_flags),
+    _player_x(player_x),
+    _player_y(player_y),
+    _block_x(block_x),
+    _block_y(block_y),
+    _moves(0)
 {
     updateValueForComparison();
 }
 
 
 State::State(const State* parent_ptr,
-        unsigned char px, unsigned char py,
-        unsigned char bx, unsigned char by, unsigned short pf):
-    puzzle(parent_ptr->puzzle),
-    parent(parent_ptr),
-    pickup_flags(pf),
-    player_x(px),
-    player_y(py),
-    block_x(bx),
-    block_y(by),
-    moves(parent_ptr->moves + 1)
+        unsigned char player_x, unsigned char player_y,
+        unsigned char block_x, unsigned char block_y,
+        unsigned short pickup_flags):
+    _puzzle(parent_ptr->_puzzle),
+    _parent(parent_ptr),
+    _pickup_flags(pickup_flags),
+    _player_x(player_x),
+    _player_y(player_y),
+    _block_x(block_x),
+    _block_y(block_y),
+    _moves(parent_ptr->_moves + 1)
 {
     updateValueForComparison();
 }
@@ -72,38 +74,38 @@ State::State(const State* parent_ptr,
 
 void State::print(ostream& out) const
 {
-    out << "player (" << (int)player_x
-        << "," << (int)player_y << ")\t"
-        << "block (" << (int)block_x
-        << "," << (int)block_y << ")";
+    out << "player (" << (int) _player_x
+        << "," << (int) _player_y << ")\t"
+        << "block (" << (int) _block_x
+        << "," << (int) _block_y << ")";
 }
 
 
 bool State::operator==(const State& rhs) const
 {
-    return (this->player_x == rhs.player_x)
-        && (this->player_y == rhs.player_y)
-        && (this->block_x == rhs.block_x)
-        && (this->block_y == rhs.block_y)
-        && (this->pickup_flags == rhs.pickup_flags);
+    return (_player_x == rhs._player_x)
+        && (_player_y == rhs._player_y)
+        && (_block_x == rhs._block_x)
+        && (_block_y == rhs._block_y)
+        && (_pickup_flags == rhs._pickup_flags);
 }
 
 
 bool State::hasParent() const
 {
-    return parent != nullptr;
+    return _parent != nullptr;
 }
 
 
 const State* State::getParent() const
 {
-    return parent;
+    return _parent;
 }
 
 
 unsigned char State::distanceFromStart() const
 {
-    return moves;
+    return _moves;
 }
 
 
@@ -116,19 +118,19 @@ unsigned char State::distanceToFinish() const
 
     unsigned short row_flags = 0;
     unsigned short column_flags = 0;
-    unsigned short pickups = pickup_flags;
+    unsigned short pickup_flags = _pickup_flags;
     unsigned int i = 0;
 
-    while (pickups != 0)
+    while (pickup_flags != 0)
     {
-        if (pickups & 1)
+        if (pickup_flags & 1)
         {
-            row_flags |= puzzle.getRowMask(i);
-            column_flags |= puzzle.getColumnMask(i);
+            row_flags |= _puzzle.getRowMask(i);
+            column_flags |= _puzzle.getColumnMask(i);
         }
 
         ++i;
-        pickups >>= 1;
+        pickup_flags >>= 1;
     }
 
     // TO DO: Use std::popcount when C++20 is available.
@@ -156,7 +158,7 @@ unsigned char State::distanceToFinish() const
 
 bool State::isFinished() const
 {
-    return (pickup_flags == 0);
+    return (_pickup_flags == 0);
 }
 
 
@@ -180,20 +182,20 @@ vector<unique_ptr<State>> State::expand() const
 
 std::unique_ptr<State> State::movePlayer(int dx, int dy) const
 {
-    auto new_player_x = player_x;
-    auto new_player_y = player_y;
-    auto new_pickup_flags = pickup_flags;
+    auto new_player_x = _player_x;
+    auto new_player_y = _player_y;
+    auto new_pickup_flags = _pickup_flags;
 
     while (true)
     {
         auto candidate_player_x = new_player_x + dx;
         auto candidate_player_y = new_player_y + dy;
 
-        if ((candidate_player_x == block_x)
-        &&  (candidate_player_y == block_y))
+        if ((candidate_player_x == _block_x)
+        &&  (candidate_player_y == _block_y))
             break;
 
-        auto tile = puzzle.getTile(candidate_player_x, candidate_player_y);
+        auto tile = _puzzle.getTile(candidate_player_x, candidate_player_y);
         if (tile == -1)
             break;
 
@@ -204,29 +206,29 @@ std::unique_ptr<State> State::movePlayer(int dx, int dy) const
 
     return std::make_unique<State>(this,
         new_player_x, new_player_y,
-        block_x, block_y,
+        _block_x, _block_y,
         new_pickup_flags);
 }
 
 
 std::unique_ptr<State> State::moveBlock(int dx, int dy) const
 {
-    auto new_block_x = block_x;
-    auto new_block_y = block_y;
+    auto new_block_x = _block_x;
+    auto new_block_y = _block_y;
 
     while (true)
     {
         auto candidate_block_x = new_block_x + dx;
         auto candidate_block_y = new_block_y + dy;
 
-        if ((candidate_block_x == player_x)
-        &&  (candidate_block_y == player_y))
+        if ((candidate_block_x == _player_x)
+        &&  (candidate_block_y == _player_y))
             break;
 
-        auto tile = puzzle.getTile(candidate_block_x, candidate_block_y);
+        auto tile = _puzzle.getTile(candidate_block_x, candidate_block_y);
         if (tile == -1)
             break;
-        if (pickup_flags & tile)
+        if (_pickup_flags & tile)
             break;
 
         new_block_x = candidate_block_x;
@@ -234,9 +236,9 @@ std::unique_ptr<State> State::moveBlock(int dx, int dy) const
     }
 
     return std::make_unique<State>(this,
-        player_x, player_y,
+        _player_x, _player_y,
         new_block_x, new_block_y,
-        pickup_flags);
+        _pickup_flags);
 }
 
 
@@ -245,15 +247,15 @@ void State::updateValueForComparison()
     // Pre-compute a value to support fast comparisons with operator<. This
     // makes std::set much faster, but requires that states are immutable.
 
-    value_for_comparison = moves + distanceToFinish();
-    value_for_comparison <<= 16;
-    value_for_comparison += pickup_flags;
-    value_for_comparison <<= 8;
-    value_for_comparison += player_x;
-    value_for_comparison <<= 8;
-    value_for_comparison += player_y;
-    value_for_comparison <<= 8;
-    value_for_comparison += block_x;
-    value_for_comparison <<= 8;
-    value_for_comparison += block_y;
+    _value_for_comparison = _moves + distanceToFinish();
+    _value_for_comparison <<= 16;
+    _value_for_comparison += _pickup_flags;
+    _value_for_comparison <<= 8;
+    _value_for_comparison += _player_x;
+    _value_for_comparison <<= 8;
+    _value_for_comparison += _player_y;
+    _value_for_comparison <<= 8;
+    _value_for_comparison += _block_x;
+    _value_for_comparison <<= 8;
+    _value_for_comparison += _block_y;
 }

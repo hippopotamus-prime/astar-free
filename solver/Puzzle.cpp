@@ -22,7 +22,8 @@
 #include <iostream>
 #include <string>
 #include <stack>
-#include <set>
+#include <unordered_set>
+#include <map>
 #include <cstring>
 #include "Puzzle.h"
 #include "State.h"
@@ -39,15 +40,6 @@ const string NUSIZ_THREE_MED    = "6";
 
 namespace
 {
-
-struct StatePtrLess
-{
-    bool operator() (const std::unique_ptr<State>& p1,
-        const std::unique_ptr<State>& p2) const
-    {
-        return *p1 < *p2;
-    }
-};
 
 struct StatePtrEqual
 {
@@ -143,17 +135,18 @@ std::unique_ptr<State> Puzzle::makeStartState() const
 unsigned int Puzzle::solve(ostream& out) const
 {
     unordered_set<std::unique_ptr<State>, StatePtrHash, StatePtrEqual> closed;
-    set<std::unique_ptr<State>, StatePtrLess> open;
+    map<State::SortKey, std::unique_ptr<State>> open;
     unsigned char max_moves = 0;
 
-    open.insert(makeStartState());
+    auto start_state = makeStartState();
+    open.emplace(start_state->getSortKey(), std::move(start_state));
 
     const State* current_state;
     do
     {
         auto first_open_node = open.extract(open.begin());
         auto [closed_node_it, insert_success] =
-            closed.insert(std::move(first_open_node.value()));
+            closed.insert(std::move(first_open_node.mapped()));
         current_state = closed_node_it->get();
 
         if(current_state->distanceFromStart() > max_moves)
@@ -166,10 +159,13 @@ unsigned int Puzzle::solve(ostream& out) const
 
         for (auto& state_ptr: successor_states)
         {
-            if ((closed.find(state_ptr) == closed.end())
-            &&  (open.find(state_ptr) == open.end()))
+            if (closed.find(state_ptr) == closed.end())
             {
-                open.insert(std::move(state_ptr));
+                auto key = state_ptr->getSortKey();
+                if (open.find(key) == open.end())
+                {
+                    open.emplace(key, std::move(state_ptr));
+                }
             }
         }
     }

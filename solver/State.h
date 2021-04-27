@@ -23,8 +23,6 @@ class State
             unsigned char block_x, unsigned char block_y,
             unsigned short pickup_flags);
 
-        bool operator<(const State& rhs) const
-            {return _value_for_comparison < rhs._value_for_comparison;}
         bool operator==(const State& rhs) const;
 
         void print(std::ostream& out) const;
@@ -35,14 +33,15 @@ class State
         const State* getParent() const;
         bool hasParent() const;       
 
+        using SortKey = std::uint64_t;
+        SortKey getSortKey() const;
+
     private:
         std::unique_ptr<State> movePlayer(int dx, int dy) const;
         std::unique_ptr<State> moveBlock(int dx, int dy) const;
-        void updateValueForComparison();
 
         const Puzzle& _puzzle;
         const State* _parent;
-        unsigned long long _value_for_comparison;
         unsigned short _pickup_flags;
         unsigned char _player_x;
         unsigned char _player_y;

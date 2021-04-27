@@ -51,7 +51,6 @@ State::State(const Puzzle& puzzle,
     _block_y(block_y),
     _moves(0)
 {
-    updateValueForComparison();
 }
 
 
@@ -68,7 +67,6 @@ State::State(const State* parent_ptr,
     _block_y(block_y),
     _moves(parent_ptr->_moves + 1)
 {
-    updateValueForComparison();
 }
 
 
@@ -242,20 +240,24 @@ std::unique_ptr<State> State::moveBlock(int dx, int dy) const
 }
 
 
-void State::updateValueForComparison()
+State::SortKey State::getSortKey() const
 {
     // Pre-compute a value to support fast comparisons with operator<. This
-    // makes std::set much faster, but requires that states are immutable.
+    // makes std::map much faster, but requires that states are immutable.
 
-    _value_for_comparison = _moves + distanceToFinish();
-    _value_for_comparison <<= 16;
-    _value_for_comparison += _pickup_flags;
-    _value_for_comparison <<= 8;
-    _value_for_comparison += _player_x;
-    _value_for_comparison <<= 8;
-    _value_for_comparison += _player_y;
-    _value_for_comparison <<= 8;
-    _value_for_comparison += _block_x;
-    _value_for_comparison <<= 8;
-    _value_for_comparison += _block_y;
+    // Note that this function will never return 0 since the player and block
+    // cannot occupy (0, 0) at the same time.
+
+    SortKey key = _moves + distanceToFinish();
+    key <<= 16;
+    key += _pickup_flags;
+    key <<= 8;
+    key += _player_x;
+    key <<= 8;
+    key += _player_y;
+    key <<= 8;
+    key += _block_x;
+    key <<= 8;
+    key += _block_y;
+    return key;
 }

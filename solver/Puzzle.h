@@ -23,8 +23,6 @@
 #define PUZZLE_
 
 #include <iostream>
-#include <vector>
-#include <unordered_set>
 #include <memory>
 
 class State;

@@ -136,7 +136,6 @@ unsigned int Puzzle::solve(ostream& out) const
 {
     unordered_set<std::unique_ptr<State>, StatePtrHash, StatePtrEqual> closed;
     map<State::SortKey, std::unique_ptr<State>> open;
-    unsigned char max_moves = 0;
 
     auto start_state = makeStartState();
     open.emplace(start_state->getSortKey(), std::move(start_state));
@@ -148,12 +147,6 @@ unsigned int Puzzle::solve(ostream& out) const
         auto [closed_node_it, insert_success] =
             closed.insert(std::move(first_open_node.mapped()));
         current_state = closed_node_it->get();
-
-        if(current_state->distanceFromStart() > max_moves)
-        {
-            max_moves = current_state->distanceFromStart();
-            //cout << (int)max_moves << endl;
-        }
 
         auto successor_states = current_state->expand();
 

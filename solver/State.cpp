@@ -160,19 +160,19 @@ bool State::isFinished() const
 }
 
 
-vector<unique_ptr<State>> State::expand() const
+array<unique_ptr<State>, 8> State::expand() const
 {
-    vector<unique_ptr<State>> new_states;
+    array<unique_ptr<State>, 8> new_states;
 
-    new_states.push_back(moveBlock(0, -1));
-    new_states.push_back(moveBlock(-1, 0));
-    new_states.push_back(moveBlock(0, 1));
-    new_states.push_back(moveBlock(1, 0));
+    new_states[0] = moveBlock(0, -1);
+    new_states[1] = moveBlock(-1, 0);
+    new_states[2] = moveBlock(0, 1);
+    new_states[3] = moveBlock(1, 0);
 
-    new_states.push_back(movePlayer(0, -1));
-    new_states.push_back(movePlayer(-1, 0));
-    new_states.push_back(movePlayer(0, 1));
-    new_states.push_back(movePlayer(1, 0));
+    new_states[4] = movePlayer(0, -1);
+    new_states[5] = movePlayer(-1, 0);
+    new_states[6] = movePlayer(0, 1);
+    new_states[7] = movePlayer(1, 0);
 
     return new_states;
 }

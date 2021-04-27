@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <vector>
+#include <array>
 
 class Puzzle;
 
@@ -29,7 +30,7 @@ class State
         bool isFinished() const;
         unsigned char distanceToFinish() const;
         unsigned char distanceFromStart() const;
-        std::vector<std::unique_ptr<State>> expand() const;
+        std::array<std::unique_ptr<State>, 8> expand() const;
         const State* getParent() const;
         bool hasParent() const;       
 

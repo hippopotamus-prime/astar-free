@@ -146,6 +146,13 @@ unsigned int Puzzle::solve(ostream& out) const
         auto first_open_node = open.extract(open.begin());
         auto [closed_node_it, insert_success] =
             closed.insert(std::move(first_open_node.mapped()));
+        if (!insert_success)
+        {
+            // A failed insert means a shorter path was already found to the
+            // same state, so we don't need to expand it again.
+            continue;
+        }
+
         current_state = closed_node_it->get();
 
         auto successor_states = current_state->expand();
@@ -159,7 +166,7 @@ unsigned int Puzzle::solve(ostream& out) const
             }
         }
     }
-    while(!current_state->isFinished() && !open.empty());
+    while (!current_state->isFinished() && !open.empty());
 
     if(open.empty())
     {

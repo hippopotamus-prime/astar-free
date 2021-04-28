@@ -101,6 +101,20 @@ const State* State::getParent() const
 }
 
 
+void State::setParent(const State* parent)
+{
+    _parent = parent;
+    if (parent)
+    {
+        _moves = parent->_moves + 1;
+    }
+    else
+    {
+        _moves = 0;
+    }
+}
+
+
 unsigned char State::distanceFromStart() const
 {
     return _moves;

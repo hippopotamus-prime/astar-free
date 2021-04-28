@@ -32,7 +32,8 @@ class State
         unsigned char distanceFromStart() const;
         std::array<std::unique_ptr<State>, 8> expand() const;
         const State* getParent() const;
-        bool hasParent() const;       
+        bool hasParent() const;
+        void setParent(const State* parent);
 
         using SortKey = std::uint64_t;
         SortKey getSortKey() const;

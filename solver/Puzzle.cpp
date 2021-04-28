@@ -134,50 +134,65 @@ std::unique_ptr<State> Puzzle::makeStartState() const
 
 unsigned int Puzzle::solve(ostream& out) const
 {
-    unordered_set<std::unique_ptr<State>, StatePtrHash, StatePtrEqual> closed;
-    map<State::SortKey, std::unique_ptr<State>> open;
+    // Track all known states in a single hash set for fast lookup, with the
+    // subset that are open sorted separately. There is an implied subset of
+    // closed states consisting of all known states that are not open.
+    unordered_set<std::unique_ptr<State>, StatePtrHash, StatePtrEqual> known_states;
+    map<State::SortKey, const State*> open_states;
 
-    auto start_state = makeStartState();
-    open.emplace(start_state->getSortKey(), std::move(start_state));
+    auto [start_state_it, dummy] = known_states.insert(makeStartState());
+    const State* start_state = start_state_it->get();
+    open_states.emplace(start_state->getSortKey(), start_state);
 
     const State* current_state;
     do
     {
-        auto first_open_node = open.extract(open.begin());
-        auto [closed_node_it, insert_success] =
-            closed.insert(std::move(first_open_node.mapped()));
-        if (!insert_success)
-        {
-            // A failed insert means a shorter path was already found to the
-            // same state, so we don't need to expand it again.
-            continue;
-        }
-
-        current_state = closed_node_it->get();
+        current_state = open_states.begin()->second;
+        open_states.erase(open_states.begin());
 
         auto successor_states = current_state->expand();
 
         for (auto& state_ptr: successor_states)
         {
-            if (closed.find(state_ptr) == closed.end())
+            auto [it, inserted] = known_states.insert(std::move(state_ptr));
+            if (inserted)
             {
-                auto key = state_ptr->getSortKey();
-                open.try_emplace(key, std::move(state_ptr));
+                // We have a never-before-seen state, so add it.
+                auto new_state_ptr = it->get();
+                auto key = new_state_ptr->getSortKey();
+                open_states.try_emplace(key, new_state_ptr);
+            }
+            else
+            {
+                // This state was already known, but we might have found a
+                // shorter path to it. (If not we can discard the new state.)
+                auto blocking_state_ptr = it->get();
+                if (state_ptr->distanceFromStart() <
+                    blocking_state_ptr->distanceFromStart())
+                {
+                    // Update the state to reflect the shorter path - this will
+                    // leave an obsolete key in the open set, but expanding it
+                    // will have no effect.
+                    blocking_state_ptr->setParent(state_ptr->getParent());
+                    auto key = state_ptr->getSortKey();
+                    open_states.try_emplace(key, blocking_state_ptr);
+                }
             }
         }
     }
-    while (!current_state->isFinished() && !open.empty());
+    while (!current_state->isFinished() && !open_states.empty());
 
-    if(open.empty())
+    if (open_states.empty())
     {
         out << "Puzzle is unsolveable!";
+        return 1;
     }
     else
     {
         stack<const State*> staq;
 
         staq.push(current_state);
-        while(current_state->hasParent())
+        while (current_state->hasParent())
         {
             current_state = current_state->getParent();
             staq.push(current_state);
@@ -188,16 +203,15 @@ unsigned int Puzzle::solve(ostream& out) const
         out << "    ;Solution\n"
             << "    ;========\n";
 
-        while(!staq.empty())
+        while (!staq.empty())
         {
             out << "    ;";
             staq.top()->print(out);
             out << "\n";
             staq.pop();
         }
+        return 0;
     }
-
-    return 0;
 }
 
 

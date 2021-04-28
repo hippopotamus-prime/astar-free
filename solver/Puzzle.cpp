@@ -23,8 +23,8 @@
 #include <string>
 #include <stack>
 #include <unordered_set>
-#include <map>
 #include <cstring>
+#include <algorithm>
 #include "Puzzle.h"
 #include "State.h"
 
@@ -43,8 +43,8 @@ namespace
 
 struct StatePtrEqual
 {
-    bool operator() (const std::unique_ptr<State>& p1,
-        const std::unique_ptr<State>& p2) const
+    bool operator() (const unique_ptr<State>& p1,
+        const unique_ptr<State>& p2) const
     {
         return *p1 == *p2;
     }
@@ -52,11 +52,39 @@ struct StatePtrEqual
 
 struct StatePtrHash
 {
-    size_t operator() (const std::unique_ptr<State>& ptr) const
+    size_t operator() (const unique_ptr<State>& ptr) const
     {
         return hash_value(*ptr);
     }
 };
+
+using StatePair = pair<State::SortKey, const State*>;
+
+struct StatePairGreater
+{
+    bool operator() (const StatePair& a, const StatePair& b) const
+    {
+        return a.first > b.first;
+    }
+};
+
+using KnownSet = unordered_set<unique_ptr<State>, StatePtrHash, StatePtrEqual>;
+using OpenSet = vector<StatePair>;
+
+void PushOpenState(OpenSet& open_states, const State* state_ptr)
+{
+    auto key = state_ptr->getSortKey();
+    open_states.emplace_back(key, state_ptr);
+    push_heap(open_states.begin(), open_states.end(), StatePairGreater());
+}
+
+const State* PopOpenState(OpenSet& open_states)
+{
+    auto state_ptr = open_states.begin()->second;
+    pop_heap(open_states.begin(), open_states.end(), StatePairGreater());
+    open_states.pop_back();
+    return state_ptr;
+}
 
 }
 
@@ -137,19 +165,17 @@ unsigned int Puzzle::solve(ostream& out) const
     // Track all known states in a single hash set for fast lookup, with the
     // subset that are open sorted separately. There is an implied subset of
     // closed states consisting of all known states that are not open.
-    unordered_set<std::unique_ptr<State>, StatePtrHash, StatePtrEqual> known_states;
-    map<State::SortKey, const State*> open_states;
+    KnownSet known_states;
+    OpenSet open_states;
 
     auto [start_state_it, dummy] = known_states.insert(makeStartState());
     const State* start_state = start_state_it->get();
-    open_states.emplace(start_state->getSortKey(), start_state);
+    open_states.emplace_back(start_state->getSortKey(), start_state);
 
     const State* current_state;
     do
     {
-        current_state = open_states.begin()->second;
-        open_states.erase(open_states.begin());
-
+        current_state = PopOpenState(open_states);
         auto successor_states = current_state->expand();
 
         for (auto& state_ptr: successor_states)
@@ -159,8 +185,7 @@ unsigned int Puzzle::solve(ostream& out) const
             {
                 // We have a never-before-seen state, so add it.
                 auto new_state_ptr = it->get();
-                auto key = new_state_ptr->getSortKey();
-                open_states.try_emplace(key, new_state_ptr);
+                PushOpenState(open_states, new_state_ptr);
             }
             else
             {
@@ -174,8 +199,7 @@ unsigned int Puzzle::solve(ostream& out) const
                     // leave an obsolete key in the open set, but expanding it
                     // will have no effect.
                     blocking_state_ptr->setParent(state_ptr->getParent());
-                    auto key = state_ptr->getSortKey();
-                    open_states.try_emplace(key, blocking_state_ptr);
+                    PushOpenState(open_states, blocking_state_ptr);
                 }
             }
         }

@@ -216,10 +216,17 @@ std::unique_ptr<State> State::movePlayer(int dx, int dy) const
         new_player_y = candidate_player_y;
     }
 
-    return std::make_unique<State>(this,
-        new_player_x, new_player_y,
-        _block_x, _block_y,
-        new_pickup_flags);
+    if ((new_player_x == _player_x) && (new_player_y == _player_y))
+    {
+        return nullptr;
+    }
+    else
+    {
+        return std::make_unique<State>(this,
+            new_player_x, new_player_y,
+            _block_x, _block_y,
+            new_pickup_flags);
+    }
 }
 
 
@@ -247,10 +254,17 @@ std::unique_ptr<State> State::moveBlock(int dx, int dy) const
         new_block_y = candidate_block_y;
     }
 
-    return std::make_unique<State>(this,
-        _player_x, _player_y,
-        new_block_x, new_block_y,
-        _pickup_flags);
+    if ((new_block_x == _block_x) && (new_block_y == _block_y))
+    {
+        return nullptr;
+    }
+    else
+    {
+        return std::make_unique<State>(this,
+            _player_x, _player_y,
+            new_block_x, new_block_y,
+            _pickup_flags);
+    }
 }
 
 

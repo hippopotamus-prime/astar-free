@@ -180,6 +180,9 @@ unsigned int Puzzle::solve(ostream& out) const
 
         for (auto& state_ptr: successor_states)
         {
+            if (!state_ptr)
+                continue;
+
             auto [it, inserted] = known_states.insert(std::move(state_ptr));
             if (inserted)
             {

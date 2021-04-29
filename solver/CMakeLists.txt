@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1.0)
+cmake_minimum_required(VERSION 3.9.4)
 project(asgen)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -31,5 +31,11 @@ target_compile_options(asgen PUBLIC
     -Winvalid-pch
     -Wformat=2
 )
+
+include(CheckIPOSupported)
+check_ipo_supported(RESULT HAVE_IPO)
+if(HAVE_IPO AND CMAKE_BUILD_TYPE STREQUAL "Release")
+    set_property(TARGET asgen PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif()
 
 install(TARGETS asgen DESTINATION bin)

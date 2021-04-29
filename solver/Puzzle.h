@@ -43,7 +43,7 @@ class Puzzle
             {return _column_masks[index];}
 
     private:
-        std::unique_ptr<State> makeStartState() const;
+        State makeStartState() const;
 
         int _map[10][16];
         unsigned short _row_masks[16];

@@ -22,7 +22,7 @@
 #include <iostream>
 #include <string>
 #include <stack>
-#include <unordered_set>
+#include <unordered_map>
 #include <cstring>
 #include <algorithm>
 #include "Puzzle.h"
@@ -41,49 +41,33 @@ const string NUSIZ_THREE_MED    = "6";
 namespace
 {
 
-struct StatePtrEqual
-{
-    bool operator() (const unique_ptr<State>& p1,
-        const unique_ptr<State>& p2) const
-    {
-        return *p1 == *p2;
-    }
-};
+using KeyedNode = pair<PathNode::SortKey, const PathNode*>;
 
-struct StatePtrHash
+struct KeyedNodeGreater
 {
-    size_t operator() (const unique_ptr<State>& ptr) const
-    {
-        return hash_value(*ptr);
-    }
-};
-
-using StatePair = pair<State::SortKey, const State*>;
-
-struct StatePairGreater
-{
-    bool operator() (const StatePair& a, const StatePair& b) const
+    bool operator() (const KeyedNode& a, const KeyedNode& b) const
     {
         return a.first > b.first;
     }
 };
 
-using KnownSet = unordered_set<unique_ptr<State>, StatePtrHash, StatePtrEqual>;
-using OpenSet = vector<StatePair>;
+using KnownSet = unordered_map<State, PathNode, StateHash>;
+using OpenSet = vector<KeyedNode>;
 
-void PushOpenState(OpenSet& open_states, const State* state_ptr)
+void PushOpenState(const Puzzle& puzzle,
+    OpenSet& open_states, const PathNode* node_ptr)
 {
-    auto key = state_ptr->getSortKey();
-    open_states.emplace_back(key, state_ptr);
-    push_heap(open_states.begin(), open_states.end(), StatePairGreater());
+    auto key = node_ptr->getSortKey(puzzle);
+    open_states.emplace_back(key, node_ptr);
+    push_heap(open_states.begin(), open_states.end(), KeyedNodeGreater());
 }
 
-const State* PopOpenState(OpenSet& open_states)
+const PathNode* PopOpenState(OpenSet& open_states)
 {
-    auto state_ptr = open_states.begin()->second;
-    pop_heap(open_states.begin(), open_states.end(), StatePairGreater());
+    auto node_ptr = open_states.begin()->second;
+    pop_heap(open_states.begin(), open_states.end(), KeyedNodeGreater());
     open_states.pop_back();
-    return state_ptr;
+    return node_ptr;
 }
 
 }
@@ -151,9 +135,9 @@ void Puzzle::init(istream& input)
 }
 
 
-std::unique_ptr<State> Puzzle::makeStartState() const
+State Puzzle::makeStartState() const
 {
-    return std::make_unique<State>(*this,
+    return State(
         _player_start_x, _player_start_y,
         _block_start_x, _block_start_y,
         _pickup_start_flags);
@@ -165,64 +149,68 @@ unsigned int Puzzle::solve(ostream& out) const
     // Track all known states in a single hash set for fast lookup, with the
     // subset that are open sorted separately. There is an implied subset of
     // closed states consisting of all known states that are not open.
-    KnownSet known_states;
-    OpenSet open_states;
+    KnownSet known_set;
+    OpenSet open_set;
 
-    auto [start_state_it, dummy] = known_states.insert(makeStartState());
-    const State* start_state = start_state_it->get();
-    open_states.emplace_back(start_state->getSortKey(), start_state);
+    auto start_state = makeStartState();
+    auto [start_state_it, dummy] = known_set.try_emplace(
+        start_state, PathNode(start_state));
 
-    const State* current_state;
-    do
+    const PathNode* current_node = &start_state_it->second;
+    open_set.emplace_back(current_node->getSortKey(*this), current_node);
+
+    while (!current_node->getState().isFinished() && !open_set.empty())
     {
-        current_state = PopOpenState(open_states);
-        auto successor_states = current_state->expand();
+        current_node = PopOpenState(open_set);
+        auto current_state = current_node->getState();
+        auto successor_states = current_state.expand(*this);
 
-        for (auto& state_ptr: successor_states)
+        for (auto state: successor_states)
         {
-            if (!state_ptr)
+            if (state == current_state)
                 continue;
 
-            auto [it, inserted] = known_states.insert(std::move(state_ptr));
+            auto [it, inserted] = known_set.try_emplace(
+                state, PathNode(current_node, state));
+
             if (inserted)
             {
                 // We have a never-before-seen state, so add it.
-                auto new_state_ptr = it->get();
-                PushOpenState(open_states, new_state_ptr);
+                auto new_node_ptr = &it->second;
+                PushOpenState(*this, open_set, new_node_ptr);
             }
             else
             {
                 // This state was already known, but we might have found a
                 // shorter path to it. (If not we can discard the new state.)
-                auto blocking_state_ptr = it->get();
-                if (state_ptr->distanceFromStart() <
-                    blocking_state_ptr->distanceFromStart())
+                auto blocking_node_ptr = &it->second;
+                auto move_count = current_node->distanceFromStart() + 1;
+                if (move_count < blocking_node_ptr->distanceFromStart())
                 {
                     // Update the state to reflect the shorter path - this will
                     // leave an obsolete key in the open set, but expanding it
                     // will have no effect.
-                    blocking_state_ptr->setParent(state_ptr->getParent());
-                    PushOpenState(open_states, blocking_state_ptr);
+                    blocking_node_ptr->setParent(current_node);
+                    PushOpenState(*this, open_set, blocking_node_ptr);
                 }
             }
         }
     }
-    while (!current_state->isFinished() && !open_states.empty());
 
-    if (open_states.empty())
+    if (open_set.empty())
     {
         out << "Puzzle is unsolveable!";
         return 1;
     }
     else
     {
-        stack<const State*> staq;
+        stack<const PathNode*> staq;
 
-        staq.push(current_state);
-        while (current_state->hasParent())
+        staq.push(current_node);
+        while (current_node->hasParent())
         {
-            current_state = current_state->getParent();
-            staq.push(current_state);
+            current_node = current_node->getParent();
+            staq.push(current_node);
         }
 
         printAsm(staq.size()-1, out);
@@ -233,7 +221,7 @@ unsigned int Puzzle::solve(ostream& out) const
         while (!staq.empty())
         {
             out << "    ;";
-            staq.top()->print(out);
+            staq.top()->getState().print(out);
             out << "\n";
             staq.pop();
         }

@@ -26,7 +26,7 @@
 
 using namespace std;
 
-size_t hash_value(const State& state)
+size_t StateHash::operator() (State state) const
 {
     size_t result = (unsigned int)(state._pickup_flags);
     result += (unsigned int)(state._player_x) * 37;
@@ -38,34 +38,14 @@ size_t hash_value(const State& state)
 }
 
 
-State::State(const Puzzle& puzzle,
-        unsigned char player_x, unsigned char player_y,
+State::State(unsigned char player_x, unsigned char player_y,
         unsigned char block_x, unsigned char block_y,
         unsigned short pickup_flags):
-    _puzzle(puzzle),
-    _parent(nullptr),
     _pickup_flags(pickup_flags),
     _player_x(player_x),
     _player_y(player_y),
     _block_x(block_x),
-    _block_y(block_y),
-    _moves(0)
-{
-}
-
-
-State::State(const State* parent_ptr,
-        unsigned char player_x, unsigned char player_y,
-        unsigned char block_x, unsigned char block_y,
-        unsigned short pickup_flags):
-    _puzzle(parent_ptr->_puzzle),
-    _parent(parent_ptr),
-    _pickup_flags(pickup_flags),
-    _player_x(player_x),
-    _player_y(player_y),
-    _block_x(block_x),
-    _block_y(block_y),
-    _moves(parent_ptr->_moves + 1)
+    _block_y(block_y)
 {
 }
 
@@ -89,19 +69,19 @@ bool State::operator==(const State& rhs) const
 }
 
 
-bool State::hasParent() const
+bool PathNode::hasParent() const
 {
     return _parent != nullptr;
 }
 
 
-const State* State::getParent() const
+const PathNode* PathNode::getParent() const
 {
     return _parent;
 }
 
 
-void State::setParent(const State* parent)
+void PathNode::setParent(const PathNode* parent)
 {
     _parent = parent;
     if (parent)
@@ -115,13 +95,13 @@ void State::setParent(const State* parent)
 }
 
 
-unsigned char State::distanceFromStart() const
+unsigned char PathNode::distanceFromStart() const
 {
     return _moves;
 }
 
 
-unsigned char State::distanceToFinish() const
+unsigned char PathNode::distanceToFinish(const Puzzle& puzzle) const
 {
     // This is the A* heuristic function - it estimates the minimum number
     // of moves to finish the puzzle as either the number of unique rows or
@@ -130,15 +110,15 @@ unsigned char State::distanceToFinish() const
 
     unsigned short row_flags = 0;
     unsigned short column_flags = 0;
-    unsigned short pickup_flags = _pickup_flags;
+    unsigned short pickup_flags = _state.getPickupFlags();
     unsigned int i = 0;
 
     while (pickup_flags != 0)
     {
         if (pickup_flags & 1)
         {
-            row_flags |= _puzzle.getRowMask(i);
-            column_flags |= _puzzle.getColumnMask(i);
+            row_flags |= puzzle.getRowMask(i);
+            column_flags |= puzzle.getColumnMask(i);
         }
 
         ++i;
@@ -168,31 +148,23 @@ unsigned char State::distanceToFinish() const
 }
 
 
-bool State::isFinished() const
+array<State, 8> State::expand(const Puzzle& puzzle) const
 {
-    return (_pickup_flags == 0);
+    return array<State, 8>
+    {
+        moveBlock(puzzle, 0, -1),
+        moveBlock(puzzle, -1, 0),
+        moveBlock(puzzle, 0, 1),
+        moveBlock(puzzle, 1, 0),
+        movePlayer(puzzle, 0, -1),
+        movePlayer(puzzle, -1, 0),
+        movePlayer(puzzle, 0, 1),
+        movePlayer(puzzle, 1, 0)
+    };
 }
 
 
-array<unique_ptr<State>, 8> State::expand() const
-{
-    array<unique_ptr<State>, 8> new_states;
-
-    new_states[0] = moveBlock(0, -1);
-    new_states[1] = moveBlock(-1, 0);
-    new_states[2] = moveBlock(0, 1);
-    new_states[3] = moveBlock(1, 0);
-
-    new_states[4] = movePlayer(0, -1);
-    new_states[5] = movePlayer(-1, 0);
-    new_states[6] = movePlayer(0, 1);
-    new_states[7] = movePlayer(1, 0);
-
-    return new_states;
-}
-
-
-std::unique_ptr<State> State::movePlayer(int dx, int dy) const
+State State::movePlayer(const Puzzle& puzzle, int dx, int dy) const
 {
     auto new_player_x = _player_x;
     auto new_player_y = _player_y;
@@ -207,7 +179,7 @@ std::unique_ptr<State> State::movePlayer(int dx, int dy) const
         &&  (candidate_player_y == _block_y))
             break;
 
-        auto tile = _puzzle.getTile(candidate_player_x, candidate_player_y);
+        auto tile = puzzle.getTile(candidate_player_x, candidate_player_y);
         if (tile == -1)
             break;
 
@@ -216,21 +188,14 @@ std::unique_ptr<State> State::movePlayer(int dx, int dy) const
         new_player_y = candidate_player_y;
     }
 
-    if ((new_player_x == _player_x) && (new_player_y == _player_y))
-    {
-        return nullptr;
-    }
-    else
-    {
-        return std::make_unique<State>(this,
-            new_player_x, new_player_y,
-            _block_x, _block_y,
-            new_pickup_flags);
-    }
+    return State(
+        new_player_x, new_player_y,
+        _block_x, _block_y,
+        new_pickup_flags);
 }
 
 
-std::unique_ptr<State> State::moveBlock(int dx, int dy) const
+State State::moveBlock(const Puzzle& puzzle, int dx, int dy) const
 {
     auto new_block_x = _block_x;
     auto new_block_y = _block_y;
@@ -244,7 +209,7 @@ std::unique_ptr<State> State::moveBlock(int dx, int dy) const
         &&  (candidate_block_y == _player_y))
             break;
 
-        auto tile = _puzzle.getTile(candidate_block_x, candidate_block_y);
+        auto tile = puzzle.getTile(candidate_block_x, candidate_block_y);
         if (tile == -1)
             break;
         if (_pickup_flags & tile)
@@ -254,21 +219,30 @@ std::unique_ptr<State> State::moveBlock(int dx, int dy) const
         new_block_y = candidate_block_y;
     }
 
-    if ((new_block_x == _block_x) && (new_block_y == _block_y))
-    {
-        return nullptr;
-    }
-    else
-    {
-        return std::make_unique<State>(this,
-            _player_x, _player_y,
-            new_block_x, new_block_y,
-            _pickup_flags);
-    }
+    return State(
+        _player_x, _player_y,
+        new_block_x, new_block_y,
+        _pickup_flags);
 }
 
 
-State::SortKey State::getSortKey() const
+PathNode::PathNode(State state):
+    _parent(nullptr),
+    _state(state),
+    _moves(0)
+{
+}
+
+
+PathNode::PathNode(const PathNode* parent, State state):
+    _parent(parent),
+    _state(state),
+    _moves(parent->_moves + 1)
+{
+}
+
+
+PathNode::SortKey PathNode::getSortKey(const Puzzle& puzzle) const
 {
     // Pre-compute a value to support fast comparisons with operator<. This
     // makes std::map much faster, but requires that states are immutable.
@@ -276,16 +250,16 @@ State::SortKey State::getSortKey() const
     // Note that this function will never return 0 since the player and block
     // cannot occupy (0, 0) at the same time.
 
-    SortKey key = _moves + distanceToFinish();
+    SortKey key = _moves + distanceToFinish(puzzle);
     key <<= 16;
-    key += _pickup_flags;
+    key += _state.getPickupFlags();
     key <<= 8;
-    key += _player_x;
+    key += _state.getPlayerX();
     key <<= 8;
-    key += _player_y;
+    key += _state.getPlayerY();
     key <<= 8;
-    key += _block_x;
+    key += _state.getBlockX();
     key <<= 8;
-    key += _block_y;
+    key += _state.getBlockY();
     return key;
 }

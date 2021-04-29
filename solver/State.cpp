@@ -28,13 +28,18 @@ using namespace std;
 
 size_t StateHash::operator() (State state) const
 {
-    size_t result = (unsigned int)(state._pickup_flags);
-    result += (unsigned int)(state._player_x) * 37;
-    result += (unsigned int)(state._player_y) * 37*37;
-    result += (unsigned int)(state._block_x) * 37*37*37;
-    result += (unsigned int)(state._block_y) * 37*37*37*37;
+    std::uint64_t value = state._pickup_flags;
+    value <<= 8;
+    value += state._player_x;
+    value <<= 8;
+    value += state._player_y;
+    value <<= 8;
+    value += state._block_x;
+    value <<= 8;
+    value += state._block_y;
 
-    return result;
+    std::hash<uint64_t> hasher;
+    return hasher(value);
 }
 
 

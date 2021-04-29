@@ -69,85 +69,6 @@ bool State::operator==(const State& rhs) const
 }
 
 
-bool PathNode::hasParent() const
-{
-    return _parent != nullptr;
-}
-
-
-const PathNode* PathNode::getParent() const
-{
-    return _parent;
-}
-
-
-void PathNode::setParent(const PathNode* parent)
-{
-    _parent = parent;
-    if (parent)
-    {
-        _moves = parent->_moves + 1;
-    }
-    else
-    {
-        _moves = 0;
-    }
-}
-
-
-unsigned char PathNode::distanceFromStart() const
-{
-    return _moves;
-}
-
-
-unsigned char PathNode::distanceToFinish(const Puzzle& puzzle) const
-{
-    // This is the A* heuristic function - it estimates the minimum number
-    // of moves to finish the puzzle as either the number of unique rows or
-    // columns with pickups present, whichever is smaller. (Given a clear
-    // path, you can clear an entire row in one move.)
-
-    unsigned short row_flags = 0;
-    unsigned short column_flags = 0;
-    unsigned short pickup_flags = _state.getPickupFlags();
-    unsigned int i = 0;
-
-    while (pickup_flags != 0)
-    {
-        if (pickup_flags & 1)
-        {
-            row_flags |= puzzle.getRowMask(i);
-            column_flags |= puzzle.getColumnMask(i);
-        }
-
-        ++i;
-        pickup_flags >>= 1;
-    }
-
-    // TO DO: Use std::popcount when C++20 is available.
-#ifdef __GNUC__
-    auto row_count = __builtin_popcount(row_flags);
-    auto column_count = __builtin_popcount(column_flags);
-#else
-    unsigned int row_count = 0;
-    unsigned int column_count = 0;
-    while (row_flags != 0)
-    {
-        row_count += (row_flags & 1);
-        row_flags >>= 1;
-    }
-    while (column_flags != 0)
-    {
-        column_count += (column_flags & 1);
-        column_flags >>= 1;
-    }
-#endif
-
-    return std::min(row_count, column_count);
-}
-
-
 array<State, 8> State::expand(const Puzzle& puzzle) const
 {
     return array<State, 8>
@@ -228,17 +149,78 @@ State State::moveBlock(const Puzzle& puzzle, int dx, int dy) const
 
 PathNode::PathNode(State state):
     _parent(nullptr),
-    _state(state),
-    _moves(0)
+    _moves(0),
+    _state(state)
 {
 }
 
 
 PathNode::PathNode(const PathNode* parent, State state):
     _parent(parent),
-    _state(state),
-    _moves(parent->_moves + 1)
+    _moves(parent->_moves + 1),
+    _state(state)
 {
+}
+
+
+void PathNode::setParent(const PathNode* parent)
+{
+    _parent = parent;
+    if (parent)
+    {
+        _moves = parent->_moves + 1;
+    }
+    else
+    {
+        _moves = 0;
+    }
+}
+
+
+unsigned short PathNode::distanceToFinish(const Puzzle& puzzle) const
+{
+    // This is the A* heuristic function - it estimates the minimum number
+    // of moves to finish the puzzle as either the number of unique rows or
+    // columns with pickups present, whichever is smaller. (Given a clear
+    // path, you can clear an entire row in one move.)
+
+    unsigned short row_flags = 0;
+    unsigned short column_flags = 0;
+    unsigned short pickup_flags = _state.getPickupFlags();
+    unsigned int i = 0;
+
+    while (pickup_flags != 0)
+    {
+        if (pickup_flags & 1)
+        {
+            row_flags |= puzzle.getRowMask(i);
+            column_flags |= puzzle.getColumnMask(i);
+        }
+
+        ++i;
+        pickup_flags >>= 1;
+    }
+
+    // TO DO: Use std::popcount when C++20 is available.
+#ifdef __GNUC__
+    auto row_count = __builtin_popcount(row_flags);
+    auto column_count = __builtin_popcount(column_flags);
+#else
+    unsigned int row_count = 0;
+    unsigned int column_count = 0;
+    while (row_flags != 0)
+    {
+        row_count += (row_flags & 1);
+        row_flags >>= 1;
+    }
+    while (column_flags != 0)
+    {
+        column_count += (column_flags & 1);
+        column_flags >>= 1;
+    }
+#endif
+
+    return std::min(row_count, column_count);
 }
 
 

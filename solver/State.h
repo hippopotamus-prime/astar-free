@@ -63,11 +63,14 @@ class PathNode
         State getState() const
             {return _state;}
 
-        unsigned char distanceToFinish(const Puzzle& puzzle) const;
-        unsigned char distanceFromStart() const;
+        unsigned short distanceToFinish(const Puzzle& puzzle) const;
+        unsigned short distanceFromStart() const
+            {return _moves;}
 
-        const PathNode* getParent() const;
-        bool hasParent() const;
+        const PathNode* getParent() const
+            {return _parent;}
+        bool hasParent() const
+            {return _parent != nullptr;}
         void setParent(const PathNode* parent);
 
         using SortKey = std::uint64_t;
@@ -75,8 +78,8 @@ class PathNode
 
     private:
         const PathNode* _parent;
+        unsigned short _moves;
         State _state;
-        unsigned char _moves;
 };
 
 #endif

@@ -50,7 +50,7 @@ function(add_map NAME)
     add_dependencies(all_maps "${TARGET}")
 endfunction()
 
-# List all map files - this will set ${MAPS}.
+# List all map files - these will be subtargets of all_maps.
 add_map(map01)
 add_map(map02)
 add_map(map03)

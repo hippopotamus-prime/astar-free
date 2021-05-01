@@ -56,8 +56,6 @@ int main(int argc, char *argv[])
         }
 
         out = &output;
-
-        cout << "This could take a while...\n";
     }
 
     if(strcmp(argv[1], "-") != 0)

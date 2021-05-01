@@ -2,10 +2,9 @@
 	include "vcs.h"
 	include "macro.h"
 
-	;leave both 0 for NTSC
-	;don't set both to 1...
-PAL60 equ 0
-PAL50 equ 0
+    ;Use -Ivariants/PAL50, -Ivariants/PAL60, or -Ivariants/NTSC to select a
+    ;version of variant.h to use.
+    include "variant.h"
 
     ;\=========================================/
     ;|\vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/|

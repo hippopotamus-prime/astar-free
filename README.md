@@ -23,6 +23,12 @@ The game will count your moves on each level and change the color of the
 counter if you go too high. But feel free to keep playing or skip to a
 different level. Have fun!
 
+The name AStar comes from an old calculator game
+[DStar](https://www.ticalc.org/archives/files/fileinfo/19/1989.html),
+which inspired the puzzle mechanic. Coincidentally, the game is also a good
+use case for the [A*](https://en.wikipedia.org/wiki/A*_search_algorithm)
+pathfinding algorithm.
+
 ## Cartridges
 Want a copy on a real physical cartridge? Get it from
 [Atari Age](https://atariage.com/store/index.php?l=product_detail&p=821)!
@@ -47,9 +53,8 @@ is shown with a dot at the bottom of the screen.
 
 ## Map Solver
 The project includes a tool to find an optimal solution for each level using
-the [A*](https://en.wikipedia.org/wiki/A*_search_algorithm) algorithm. Levels
-are written as plain text maps and the tool generates assembly source with
-solutions as comments. See solver/README.md for details.
+the A* algorithm. Levels are written as plain text maps and the tool generates
+assembly source with solutions as comments. See solver/README.md for details.
 
 ## Building
 Use CMake to build the game.

@@ -9,8 +9,8 @@
 ## About
 **AStar** is a puzzle game for the Atari 2600 featuring colorful graphics
 and a unique play mechanic. You control a character ("Bob") who must navigate
-a series of levels to collect items. <span style="font-size:x-small">*Bob has
-no relation to any character in any other game.*</span>
+a series of levels to collect items. *Bob has no relation to any character in
+any other game.*
 
 * **The goal**: Collect all the items on each level. Cherries, pretzels,
 ice cream cones, roses, and more! To win the game you must complete each level

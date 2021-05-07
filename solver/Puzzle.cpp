@@ -72,66 +72,146 @@ const PathNode* PopOpenState(OpenSet& open_states)
 
 }
 
-void Puzzle::init(istream& input)
+bool Puzzle::init(istream& input)
 {
     unsigned int pickups = 0;
     _pickup_start_flags = 0;
-
-    unsigned int i, j;
-    unsigned int char_count = 0;
+    bool have_player = false;
+    bool have_block = false;
 
     memset(_map, 0, sizeof(_map));
     memset(_column_masks, 0, sizeof(_column_masks));
     memset(_row_masks, 0, sizeof(_row_masks));
 
-    while(char_count < 160)
+    unsigned int line_count = 0;
+    unsigned int row_count = 0;
+    while (!input.eof())
     {
-        char c;
+        string line;
+        getline(input, line);
+        ++line_count;
+        string_view line_view = line;
 
-        input >> c;
+        // Ignore leading whitespace.
+        auto content_start = line_view.find_first_not_of(" \t\r");
 
-        i = char_count % 16;
-        j = char_count / 16;
+        // Skip lines that are nothing but whitespace.
+        if (content_start == string::npos)
+            continue;
 
-        switch(c)
+        // Ignore comments.
+        string_view content_view;
+        auto comment_start = line_view.find_first_of(";", content_start);
+        if (comment_start == string::npos)
         {
-            // Wall
-            case 'W':
-                _map[j][i] = -1;
-                ++char_count;
-                break;
+            content_view = line_view.substr(content_start);
+        }
+        else
+        {
+            content_view = line_view.substr(content_start,
+                comment_start - content_start);
+        }
 
-            // Collectible
-            case 'R':
-            case 'o':
-                _map[j][i] = 1 << pickups;
-                _pickup_start_flags |= 1 << pickups;
-                _column_masks[pickups] = 1 << i;
-                _row_masks[pickups++] = 1 << j;
-                ++char_count;
-                break;
+        // Ignore trailing whitespace.
+        auto content_last = content_view.find_last_not_of(" \t\r");
+        if (content_last != string::npos)
+        {
+            content_view = content_view.substr(0, content_last + 1);
+        }
 
-            // Player
-            case 'P':
-                _player_start_x = i;
-                _player_start_y = j;
-                ++char_count;
-                break;
+        // Skip lines that are purely comments.
+        if (content_view.empty())
+            continue;
 
-            // Block
-            case 'B':
-                _block_start_x = i;
-                _block_start_y = j;
-                ++char_count;
-                break;
+        // Confirm each row has the right length.
+        if (content_view.size() != 16)
+        {
+            cerr << "Line " << line_count
+                << ": expected 16 characters per row, got "
+                << content_view.size() << "\n";
+            return false;
+        }
 
-            // Empty Space
-            case 'S':
-            case '.':
-                ++char_count;
-                break;
-        }    
+        // Parse the row.
+        for (unsigned int i = 0; i < content_view.size(); ++i)
+        {
+            switch (content_view[i])
+            {
+                // Wall
+                case 'W':
+                case '#':
+                    _map[row_count][i] = -1;
+                    break;
+
+                // Collectible
+                case 'R':
+                case 'o':
+                    _map[row_count][i] = 1 << pickups;
+                    _pickup_start_flags |= 1 << pickups;
+                    _column_masks[pickups] = 1 << i;
+                    _row_masks[pickups++] = 1 << row_count;
+                    break;
+
+                // Player
+                case 'P':
+                    if (have_player)
+                    {
+                        cerr << "Line " << line_count
+                            << ": duplicate player position\n";
+                        return false;
+                    }
+                    _player_start_x = i;
+                    _player_start_y = row_count;
+                    have_player = true;
+                    break;
+
+                // Block
+                case 'B':
+                    if (have_block)
+                    {
+                        cerr << "Line " << line_count
+                            << ": duplicate block position\n";
+                        return false;
+                    }
+                    _block_start_x = i;
+                    _block_start_y = row_count;
+                    have_block = true;
+                    break;
+
+                // Empty Space
+                case 'S':
+                case '.':
+                    break;
+
+                default:
+                    cerr << "Line " << line_count
+                        << ": unexpected character: '"
+                        << content_view[i] << "'\n";
+                    return false;
+            }
+        }
+
+        ++row_count;
     }
+
+    // Check common error conditions.
+    if (row_count != 10)
+    {
+        cerr << "Expected 10 rows, got " << row_count << "\n";
+        return false;
+    }
+    if (!have_player)
+    {
+        cerr << "No player position in map\n";
+        return false;
+    }
+    if (!have_block)
+    {
+        cerr << "No block position in map\n";
+        return false;
+    }
+
+    return true;
 }
 
 

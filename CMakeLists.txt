@@ -44,6 +44,7 @@ function(add_map NAME)
         MAIN_DEPENDENCY "${INPUT}"
         SOURCES "${INPUT}"
         COMMENT "Processing map file ${INPUT}"
+        DEPENDS asgen
     )
     set(TARGET "map_${NAME}")
     add_custom_target("${TARGET}" DEPENDS "${OUTPUT}")

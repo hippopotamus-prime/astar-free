@@ -34,47 +34,51 @@ int main(int argc, char *argv[])
     istream* in = &cin;
     ostream* out = &cout;
 
-    if(argc != 3)
+    if (argc != 3)
     {
         cout << "Usage is \"asgen [input file] [output file]\"\n"
              << "Use \"-\" for console input / output."
              << endl;
-        return -1;
+        return 1;
     }
 
-    if(strcmp(argv[2], "-") != 0)
+    if (strcmp(argv[2], "-") != 0)
     {
         output.open(argv[2]);
 
-        if(output.fail())
+        if (output.fail())
         {
             cerr << "Could not open the file \""
                  << argv[2] << "\" "
-                 << "for output."
-                 << endl;
-            return -2;
+                 << "for output.\n";
+            return 1;
         }
 
         out = &output;
     }
 
-    if(strcmp(argv[1], "-") != 0)
+    if (strcmp(argv[1], "-") != 0)
     {
         input.open(argv[1]);
 
-        if(input.fail())
+        if (input.fail())
         {
             cerr << "Could not open the file \""
                  << argv[1] << "\" "
-                 << "for input."
-                 << endl;
-            return -3;
+                 << "for input.\n";
+            return 1;
         }
 
         in = &input;
     }
 
     Puzzle puzzle;
-    puzzle.init(*in);
-    return puzzle.solve(*out);
+    if (puzzle.init(*in))
+    {
+        return puzzle.solve(*out);
+    }
+    else
+    {
+        return 1;
+    }
 }

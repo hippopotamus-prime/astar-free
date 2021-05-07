@@ -27,8 +27,10 @@ asgen INPUTFILE OUTPUTFILE
 You can specify either a file name or "-" for console input / output.
 
 See the *maps* directory for example input files. The meaning of each
-character in the input is described below. Only the first 160
-characters (not counting line endings) from the input file will be read.
+character in the input is described below. Input must contain exactly 10
+lines of map content with 16 characters on each line. Empty lines, leading
+and trailing whitespace, and comments are ignored. Comments begin with ';'
+and continue to the end of the line.
 
 Character | Meaning
 --------- | -------

@@ -30,7 +30,7 @@ class State;
 class Puzzle
 {
     public:
-        void init(std::istream& input);
+        bool init(std::istream& input);
         unsigned int solve(std::ostream& out = std::cout) const;
         void printAsm(unsigned int moves_to_finish,
             std::ostream& out = std::cout) const;

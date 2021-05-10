@@ -70,11 +70,28 @@ const PathNode* PopOpenState(OpenSet& open_states)
     return node_ptr;
 }
 
+bool IsValidSpacing(unsigned int spacing)
+{
+    switch (spacing)
+    {
+        case 0b000000001:
+        case 0b000000101:
+        case 0b000010001:
+        case 0b000010101:
+        case 0b100000001:
+        case 0b100010001:
+            return true;
+
+        default:
+            return false;
+    }
+}
+
 }
 
 bool Puzzle::init(istream& input)
 {
-    unsigned int pickups = 0;
+    unsigned int item_count = 0;
     _pickup_start_flags = 0;
     bool have_player = false;
     bool have_block = false;
@@ -133,6 +150,7 @@ bool Puzzle::init(istream& input)
         }
 
         // Parse the row.
+        unsigned int item_spacing = 0;
         for (unsigned int i = 0; i < content_view.size(); ++i)
         {
             switch (content_view[i])
@@ -146,10 +164,17 @@ bool Puzzle::init(istream& input)
                 // Collectible
                 case 'R':
                 case 'o':
-                    _map[row_count][i] = 1 << pickups;
-                    _pickup_start_flags |= 1 << pickups;
-                    _column_masks[pickups] = 1 << i;
-                    _row_masks[pickups++] = 1 << row_count;
+                    _map[row_count][i] = 1 << item_count;
+                    _pickup_start_flags |= 1 << item_count;
+                    _column_masks[item_count] = 1 << i;
+                    _row_masks[item_count++] = 1 << row_count;
+                    item_spacing |= 1;
+                    if (!IsValidSpacing(item_spacing))
+                    {
+                        cerr << "Line " << line_count
+                            << ": invalid item spacing\n";
+                        return false;
+                    }
                     break;
 
                 // Player
@@ -189,6 +214,8 @@ bool Puzzle::init(istream& input)
                         << content_view[i] << "'\n";
                     return false;
             }
+
+            item_spacing <<= 1;
         }
 
         ++row_count;

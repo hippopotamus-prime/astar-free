@@ -1,0 +1,24 @@
+; First level. This should be very easy, but introduce a few concepts:
+; - Basic player movement
+; - There are multiple paths to the items
+; - Some paths are better than others
+; - You can collect multiple items in one move
+;
+; "Very easy" means:
+; - No block movement should be needed for the solution
+; - Choices are binary - right or left
+; - The level is a series of small independent puzzles, so not much advance
+;   planning is needed
+; - The items mostly act as breadcrumbs leading you on the correct path,
+;   with few real choices presented
+
+WWWWWWWWWWWWWWWW
+W..BWW..WW...WWW
+W.oW..o.W.....PW
+W.......WWo.o.oW
+WWW.W.o..W.....W
+W.o.WWo..WWW.WWW
+W.W...o..Wo...oW
+W...W.oWWW..W.oW
+W.o.W.....o....W
+WWWWWWWWWWWWWWWW

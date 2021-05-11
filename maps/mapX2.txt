@@ -1,0 +1,19 @@
+; Level 2.
+; This should be harder than level 1, but still easy. More specifically, that
+; means:
+; - Still no block movement required
+; - The level is still independent sequential set pieces
+; - But we open with a 3-way choice - right, left, or up
+; - More choices are presented where the better path is only apparent
+;   several moves deep
+
+WWWWWWWWWWWWWWWW
+W....W...WBW..oW
+W.WWoW..oW..o..W
+W........W.o.W.W
+Wo......Wo...W.W
+WWWWW.W...W.oW.W
+W..o..WWW.Wo...W
+W.W....W..o.WW.W
+Wo.P.o.W.o.....W
+WWWWWWWWWWWWWWWW

@@ -26,7 +26,6 @@ SCREEN_WAIT         equ 192
 SOUND_STEP          equ 86
     ENDIF
 
-LEVELS              equ 24
 BLOCK_HEIGHT        equ 16      ;Don't change this!
 BOARD_HEIGHT        equ 10
 
@@ -240,33 +239,7 @@ overscan: subroutine
     include "maps/map_base.asm"
 
 map_base:
-    include "maps/title.asm"
-    include "maps/mapE1.asm"
-    include "maps/mapE2.asm"
-    include "maps/map01.asm"
-    include "maps/map02.asm"
-    include "maps/map03.asm"
-    include "maps/map04.asm"
-    include "maps/map05.asm"
-    include "maps/map06.asm"
-    include "maps/map07.asm"
-    include "maps/map08.asm"
-    include "maps/map09.asm"
-    include "maps/map10.asm"
-    include "maps/map11.asm"
-    include "maps/map12.asm"
-    include "maps/map13.asm"
-    include "maps/map14.asm"
-    include "maps/map15.asm"
-    include "maps/map16.asm"
-    include "maps/map17.asm"
-    include "maps/map18.asm"
-    include "maps/map19.asm"
-    include "maps/map20.asm"
-    include "maps/map21.asm"
-    include "maps/map22.asm"
-    include "maps/end.asm"
-    include "maps/mapS1.asm"
+    include "map_includes.inc"
 
 pickup_gfx_table:
     .byte <pickup_gfx_cherries

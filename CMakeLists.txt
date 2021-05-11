@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.9.4)
+cmake_minimum_required(VERSION 3.12)
 project(astar)
 
 # Look for dasm in standard paths or DASM_ROOT if set.
@@ -32,12 +32,9 @@ endif()
 
 # Prepare the map solver.
 add_subdirectory(solver)
-add_custom_target(all_maps)
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/maps")
 
-function(add_map NAME)
-    set(INPUT "${CMAKE_CURRENT_SOURCE_DIR}/maps/${NAME}.txt")
-    set(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/maps/${NAME}.asm")
+function(add_map_rule INPUT OUTPUT)
     add_custom_command(
         OUTPUT "${OUTPUT}"
         COMMAND asgen "${INPUT}" "${OUTPUT}"
@@ -46,37 +43,62 @@ function(add_map NAME)
         COMMENT "Processing map file ${INPUT}"
         DEPENDS asgen
     )
-    set(TARGET "map_${NAME}")
-    add_custom_target("${TARGET}" DEPENDS "${OUTPUT}")
-    add_dependencies(all_maps "${TARGET}")
 endfunction()
 
-# List all map files - these will be subtargets of all_maps.
-add_map(map01)
-add_map(map02)
-add_map(map03)
-add_map(map04)
-add_map(map05)
-add_map(map06)
-add_map(map07)
-add_map(map08)
-add_map(map09)
-add_map(map10)
-add_map(map11)
-add_map(map12)
-add_map(map13)
-add_map(map14)
-add_map(map15)
-add_map(map16)
-add_map(map17)
-add_map(map18)
-add_map(map19)
-add_map(map20)
-add_map(map21)
-add_map(map22)
-add_map(mapE1)
-add_map(mapE2)
-add_map(mapS1)
+function(add_maps)
+    # Add a rule to process each map file with the solver
+    foreach(NAME ${ARGV})
+        set(MAP_TXT "${CMAKE_CURRENT_SOURCE_DIR}/maps/${NAME}.txt")
+        set(MAP_ASM "${CMAKE_CURRENT_BINARY_DIR}/maps/${NAME}.asm")
+        set(PROCESSED_MAP_FILES "${PROCESSED_MAP_FILES}" "${MAP_ASM}")
+        add_map_rule("${MAP_TXT}" "${MAP_ASM}")
+    endforeach()
+
+    # Add one more rule to generate an include file with the processed maps
+    set(ALL_MAPS_INC "${CMAKE_CURRENT_BINARY_DIR}/map_includes.inc")
+    set(SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/MapIncludes.cmake")
+    separate_arguments(MAP_NAMES_ARG NATIVE_COMMAND "${ARGV}")
+    add_custom_command(
+        OUTPUT "${ALL_MAPS_INC}"
+        COMMAND ${CMAKE_COMMAND}
+            -DMAP_NAMES="${MAP_NAMES_ARG}"
+            -DOUTPUT="${ALL_MAPS_INC}"
+            -P "${SCRIPT}"
+        DEPENDS
+            "${SCRIPT}"
+            ${PROCESSED_MAP_FILES}
+        COMMENT "Generating map include file"
+    )
+endfunction()
+
+# List all map files in maps/ - these will be processed by the solver.
+add_maps(
+    mapE1
+    mapE2
+    map01
+    map02
+    map03
+    map04
+    map05
+    map06
+    map07
+    map08
+    map09
+    map10
+    map11
+    map12
+    map13
+    map14
+    map15
+    map16
+    map17
+    map18
+    map19
+    map20
+    map21
+    map22
+    mapS1
+)
 
 # Prepare rules to build the binaries.
 add_custom_target(all_binaries ALL)
@@ -127,11 +149,11 @@ function(add_binary VARIANT)
             "${CMAKE_CURRENT_SOURCE_DIR}/sound/songs.asm"
             "${CMAKE_CURRENT_SOURCE_DIR}/sound/speech.asm"
             "${CMAKE_CURRENT_SOURCE_DIR}/variants/${VARIANT}/variant.h"
+            "${CMAKE_CURRENT_BINARY_DIR}/map_includes.inc"
     )
 
     set(TARGET "binary_${VARIANT}")
     add_custom_target("${TARGET}" DEPENDS "${BIN_FILE}")
-    add_dependencies("${TARGET}" all_maps)
     add_dependencies(all_binaries "${TARGET}")
 endfunction()
 

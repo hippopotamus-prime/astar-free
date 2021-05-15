@@ -1,0 +1,21 @@
+; Level 3.
+; This level is a basic introduction to block movement, but should otherwise
+; be very easy.
+; - The level is still made of independent sequential set pieces
+; - Generally few branching choices
+; - Choices for the block are very limited - it's (pretty much) locked in a
+;   track
+; - No advanced tricks like using the player to position the block
+; - The idea that items block the block can be seen, but isn't needed to
+;   solve the level
+
+################
+#B..#o...##..o.#
+###.o..#o....#.#
+##..#....##o.o.#
+#.o.P#...##...##
+#o...o#...######
+##..o.#...#.o..#
+###.##......#..#
+##o......#o...##
+################

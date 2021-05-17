@@ -6,7 +6,7 @@
 ; - Choices for the block are very limited - it's (pretty much) locked in a
 ;   track
 ; - No advanced tricks like using the player to position the block
-; - The idea that items block the block can be seen, but isn't needed to
+; - The idea that items stop block movement can be seen, but isn't needed to
 ;   solve the level
 
 ################

@@ -1,0 +1,16 @@
+; Level 4.
+; This continues the introduction to block movement.
+; - This is another set of sequential set pieces
+; - To solve the level, you must move the block against items, then collect
+;   the items to let the block progress
+
+################
+#P.B###o.......#
+#.....#..o.o.o.#
+#..o..#o...o...#
+###.o##.##.#.#.#
+#o...o#......###
+#.....#.##...o.#
+##o...o.#.o..#.#
+#.......#....o.#
+################

@@ -87,6 +87,16 @@ bool IsValidSpacing(unsigned int spacing)
     }
 }
 
+bool IsSolidRow(const int* map_row)
+{
+    for (unsigned int i = 0; i < MAP_WIDTH; ++i)
+    {
+        if (map_row[i] >= 0)
+            return false;
+    }
+    return true;
+}
+
 }
 
 bool Puzzle::init(istream& input)
@@ -241,6 +251,11 @@ bool Puzzle::init(istream& input)
     if (!have_block)
     {
         cerr << "No block position in map\n";
+        return false;
+    }
+    if (!IsSolidRow(_map[0]) || !IsSolidRow(_map[MAP_HEIGHT -1 ]))
+    {
+        cerr << "Top and bottom row must be solid\n";
         return false;
     }
 

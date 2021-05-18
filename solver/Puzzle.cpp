@@ -87,7 +87,7 @@ bool IsValidSpacing(unsigned int spacing)
     }
 }
 
-bool IsSolidRow(const int* map_row)
+bool IsSolidRow(const int map_row[MAP_WIDTH])
 {
     for (unsigned int i = 0; i < MAP_WIDTH; ++i)
     {
@@ -95,6 +95,71 @@ bool IsSolidRow(const int* map_row)
             return false;
     }
     return true;
+}
+
+bool IsClosed(const int map[MAP_HEIGHT][MAP_WIDTH],
+    unsigned int player_start_x, unsigned int player_start_y,
+    unsigned int block_start_x, unsigned int block_start_y)
+{
+    // The idea here is to flood-fill the map to mark every place reachable
+    // by either the player or the block. If the fill reaches the edge of the
+    // map, the map is invalid.
+    
+    // Note that since flood fill doesn't follow the in-game movement rules,
+    // this can actually reject some usable maps. (Having an open edge doesn't
+    // always mean the player can fall off it.)
+
+    bool fill[MAP_HEIGHT][MAP_WIDTH];
+    memset(fill, 0, sizeof(fill));
+
+    fill[player_start_y][player_start_x] = 1;
+    fill[block_start_y][block_start_x] = 1;
+
+    while (true)
+    {
+        bool advanced = false;
+        for (unsigned int j = 0; j < MAP_HEIGHT; ++j)
+        {
+            for (unsigned int i = 0; i < MAP_WIDTH; ++i)
+            {
+                if (!fill[j][i])
+                    continue;
+
+                if ((i == 0) || (i + 1 == MAP_WIDTH))
+                    return false;
+
+                if ((j == 0) || (j + 1 == MAP_HEIGHT))
+                    return false;
+
+                if ((map[j][i - 1] >= 0) && !fill[j][i - 1])
+                {
+                    fill[j][i - 1] = true;
+                    advanced = true;
+                }
+
+                if ((map[j][i + 1] >= 0) && !fill[j][i + 1])
+                {
+                    fill[j][i + 1] = true;
+                    advanced = true;
+                }
+
+                if ((map[j - 1][i] >= 0) && !fill[j - 1][i])
+                {
+                    fill[j - 1][i] = true;
+                    advanced = true;
+                }
+
+                if ((map[j + 1][i] >= 0) && !fill[j + 1][i])
+                {
+                    fill[j + 1][i] = true;
+                    advanced = true;
+                }
+            }
+        }
+
+        if (!advanced)
+            return true;
+    }
 }
 
 }
@@ -256,6 +321,12 @@ bool Puzzle::init(istream& input)
     if (!IsSolidRow(_map[0]) || !IsSolidRow(_map[MAP_HEIGHT -1 ]))
     {
         cerr << "Top and bottom row must be solid\n";
+        return false;
+    }
+    if (!IsClosed(_map, _player_start_x, _player_start_y,
+            _block_start_x, _block_start_y))
+    {
+        cerr << "Map must have a closed perimeter\n";
         return false;
     }
 

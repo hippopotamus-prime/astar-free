@@ -141,10 +141,10 @@ bool Puzzle::init(istream& input)
             continue;
 
         // Confirm each row has the right length.
-        if (content_view.size() != 16)
+        if (content_view.size() != MAP_WIDTH)
         {
             cerr << "Line " << line_count
-                << ": expected 16 characters per row, got "
+                << ": expected " << MAP_WIDTH << " characters per row, got "
                 << content_view.size() << "\n";
             return false;
         }
@@ -173,6 +173,12 @@ bool Puzzle::init(istream& input)
                     {
                         cerr << "Line " << line_count
                             << ": invalid item spacing\n";
+                        return false;
+                    }
+                    if (item_count > MAX_PICKUP_COUNT)
+                    {
+                        cerr << "Line " << line_count
+                            << ": too many items\n";
                         return false;
                     }
                     break;
@@ -222,9 +228,9 @@ bool Puzzle::init(istream& input)
     }
 
     // Check common error conditions.
-    if (row_count != 10)
+    if (row_count != MAP_HEIGHT)
     {
-        cerr << "Expected 10 rows, got " << row_count << "\n";
+        cerr << "Expected " << MAP_HEIGHT << " rows, got " << row_count << "\n";
         return false;
     }
     if (!have_player)

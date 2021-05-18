@@ -27,6 +27,10 @@
 
 class State;
 
+constexpr unsigned int MAP_HEIGHT = 10;
+constexpr unsigned int MAP_WIDTH = 16;
+constexpr unsigned int MAX_PICKUP_COUNT = (3 * (MAP_HEIGHT - 2));
+
 class Puzzle
 {
     public:
@@ -45,9 +49,9 @@ class Puzzle
     private:
         State makeStartState() const;
 
-        int _map[10][16];
-        unsigned short _row_masks[16];
-        unsigned short _column_masks[16];
+        int _map[MAP_HEIGHT][MAP_WIDTH];
+        unsigned short _row_masks[MAX_PICKUP_COUNT];
+        unsigned short _column_masks[MAX_PICKUP_COUNT];
 
         unsigned short _pickup_start_flags;
         unsigned char _player_start_x;

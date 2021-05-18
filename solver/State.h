@@ -39,7 +39,7 @@ class State
         State movePlayer(const Puzzle& puzzle, int dx, int dy) const;
         State moveBlock(const Puzzle& puzzle, int dx, int dy) const;
 
-        unsigned short _pickup_flags;
+        std::uint32_t _pickup_flags;
         unsigned char _player_x;
         unsigned char _player_y;
         unsigned char _block_x;

@@ -174,11 +174,32 @@ init_game: subroutine
     .byte >blank
     .byte <blank
     .byte STATE_LOAD
-    .byte %00000000
-    .byte %00000000
-    .byte %00000000
-    .byte %11111111
 
+    ; Levels completion flags, where the most significant bit in each byte
+    ; is the lowest numbered level. Levels not present in the game are set
+    ; to '1' so you don't need to complete them.
+    .byte %11111111 >> (LEVELS)
+    IFCONST LEVELS
+    IF LEVELS >= 8
+    .byte %11111111 >> (LEVELS - 8)
+    ELSE
+    .byte %11111111
+    ENDIF
+    IF LEVELS >= 16
+    .byte %11111111 >> (LEVELS - 16)
+    ELSE
+    .byte %11111111
+    ENDIF
+    IF LEVELS >= 24
+    .byte %11111111 >> (LEVELS - 24)
+    ELSE
+    .byte %11111111
+    ENDIF
+    ELSE
+    .byte %11111111
+    .byte %11111111
+    .byte %11111111
+    ENDIF
 
     ;---- Return the status of SWCHB ----
     ;no input

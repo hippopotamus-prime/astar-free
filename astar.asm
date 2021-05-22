@@ -163,8 +163,8 @@ scratch11           equ scratch8 + 3
 
     include "kernel.asm"
     include "status_display.asm"
-    include "state.asm"
     include "subroutines.asm"
+    include "state.asm"
     include "game.asm"
     include "map_loader.asm"
     include "sound.asm"
@@ -260,7 +260,7 @@ pickup_gfx_table:
     ;   player_gfx.asm
     ;   splash_gfx.asm     <--- this one maybe not
 
-    org $fd0a
+    org $fd10
     include "gradients.asm"
     include "digit_gfx.asm"
 

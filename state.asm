@@ -110,16 +110,19 @@ win: subroutine
 advance: subroutine
     lda #STATE_LOAD
     sta state
+    ldx advance_status
+    cpx #2
+    bne .no_win
 
     ;-- Inline: Check if every level is completed --
     ;input:  none (reads level_flags)
     ;output:  z if all are completed
     ;destroys: a, x
-    ldx #4
+    ldy #4
     lda #%11111111
 .loop:
-        and level_flags-1,x
-        dex
+        and level_flags-1,y
+        dey
         bne .loop
     eor #%11111111
 
@@ -133,7 +136,7 @@ advance: subroutine
     lda level
     cmp #LEVELS
     bcc .no_wrap
-        stx level   ;x=0 from the loop
+        sty level   ;y=0 from the loop
 .no_wrap:
     inc level
 
@@ -141,7 +144,6 @@ advance: subroutine
     ;Finish level 3 or higher perfectly and hold
     ;up on P0, down on P1, then you go to the
     ;secret level.
-    ldx advance_status
     cmp #3
     bcc .no_easter
         txa

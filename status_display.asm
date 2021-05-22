@@ -196,6 +196,7 @@ show_splash: subroutine
     bpl .loop
 
     sta WSYNC
+    txa
     inx             ;wipe graphics and draw a blank line
     stx GRP1        ;before flowing into the next part...
     stx GRP0
@@ -203,25 +204,26 @@ show_splash: subroutine
 
     ;Now show markers for the levels that have been completed
     sta WSYNC
-    lda level_flags+0,x ;4
-    sta GRP0,x          ;4 = 8
-    lda level_flags+1,x ;4
-    sta GRP1,x          ;4 = 16
-    lda level_flags+2,x ;4
-    sta GRP0,x          ;4 = 24
+    tay                         ;2
+    eor initial_level_flags+0   ;4
+    and level_flags+0           ;3
+    sta GRP0                    ;3 = 12
+    tya                         ;2
+    eor initial_level_flags+1   ;4
+    and level_flags+1           ;3
+    sta GRP1                    ;3 = 24
+    tya                         ;2
+    eor initial_level_flags+2   ;4
+    and level_flags+2           ;3
+    sta GRP0                    ;3 = 36
 
-    ;restore these to their correct values
-    stx pf1buf          ;3
-    stx pf2buf          ;3
-    dec pf1buf          ;5
-    dec pf2buf          ;5 = 40
-    nop                 ;2 = 42
-
-    stx GRP1
+    ;restore these to their correct values    
+    sty pf1buf                  ;3
+    sty pf2buf                  ;3
+    stx GRP1                    ;3 = 45
     stx GRP0
     stx VDELP0
     rts
-
 
 
 icon_msbs:

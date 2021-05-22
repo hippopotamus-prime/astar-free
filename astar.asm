@@ -260,10 +260,9 @@ pickup_gfx_table:
     ;   player_gfx.asm
     ;   splash_gfx.asm     <--- this one maybe not
 
-    org $fd03
+    org $fd0a
     include "gradients.asm"
     include "digit_gfx.asm"
-    .byte "Can'-Ka No Rey"
 
     org  $fe00
     include "pickup_gfx.asm"

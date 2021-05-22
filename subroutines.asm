@@ -175,9 +175,10 @@ init_game: subroutine
     .byte <blank
     .byte STATE_LOAD
 
-    ; Levels completion flags, where the most significant bit in each byte
-    ; is the lowest numbered level. Levels not present in the game are set
+    ; Initial level completion flags, where the most significant bit in each
+    ; byte is the lowest numbered level. Levels not present in the game are set
     ; to '1' so you don't need to complete them.
+initial_level_flags:
     .byte %11111111 >> (LEVELS)
     IFCONST LEVELS
     IF LEVELS >= 8

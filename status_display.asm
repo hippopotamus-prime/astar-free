@@ -44,7 +44,7 @@ show_status: subroutine
     ;Darken the display if we've gone over
     ;the par number of moves
 
-    ldx #PLAYER_COLU & $f0
+    ldx #(PLAYER_COLU & $f0) + 2
 
     jsr compare_par
     bcc .over_par

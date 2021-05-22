@@ -1,7 +1,7 @@
 ; Level 5.
 ; Last part of the introduction to block movement - using the player to stop
-; block movement. This leads to the idea of stacking the player and block
-; in multiple steps to reach difficult places.
+; the block. This leads to the idea of stacking the player and block in
+; multiple steps to reach difficult places.
 
 ################
 #o#o#o###..#P..#

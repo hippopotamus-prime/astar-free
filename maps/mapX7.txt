@@ -1,5 +1,6 @@
 ; Level 7.
-; This should be pretty hard...
+; This should be another fairly difficult level. The player and block both
+; have four possible opening moves.
 
 ################
 #..#.#.........#

@@ -1,0 +1,15 @@
+; Level 8.
+; This is the last level in the set and should be the hardest one. There's a
+; big open space with many possible moves, but also items stuck in alcoves
+; that require a lot of positioning to reach.
+
+################
+#....o#o#o.....#
+#....##....o.o.#
+###o....#.P....#
+##...##.o.....##
+#...o#o.B...#..#
+#....o#......o.#
+##..o...o...o..#
+#......o.o.....#
+################

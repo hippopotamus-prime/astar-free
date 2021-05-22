@@ -1,5 +1,7 @@
 ; Level 6.
-; No new techniques, just more open space and different possible paths.
+; We're done with the intro, so no new techniques. This should be a fairly
+; difficult level since it has more open space and different possible paths.
+; There's no obvious linear sequence.
 
 ################
 #.......#......#

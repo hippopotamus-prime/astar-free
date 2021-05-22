@@ -42,7 +42,7 @@ mark_level:
     ;input:  none
     ;output:  as normal cmp (par to moves)
     ;destroys: a
-compare_par:
+compare_par: subroutine
     clc
     lda moves+1
     bne .end

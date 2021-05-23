@@ -69,6 +69,7 @@ function(add_maps)
             ${PROCESSED_MAP_FILES}
         COMMENT "Generating map include file"
     )
+    add_custom_target(map_includes DEPENDS ${ALL_MAPS_INC})
 endfunction()
 
 # List all map files in maps/ - these will be processed by the solver.
@@ -134,7 +135,13 @@ function(add_binary VARIANT)
             "${CMAKE_CURRENT_SOURCE_DIR}/sound/songs.asm"
             "${CMAKE_CURRENT_SOURCE_DIR}/sound/speech.asm"
             "${CMAKE_CURRENT_SOURCE_DIR}/variants/${VARIANT}/variant.h"
+            # The redundant dependencies below are due to quirks in CMake.
+            # Listing the .inc file forces the binary targets to be updated
+            # any time a map source file changes, while the the map_includes
+            # target forces the .inc file to be built /before/ any binary
+            # targets. Neither is sufficient alone.
             "${CMAKE_CURRENT_BINARY_DIR}/map_includes.inc"
+            map_includes
     )
 
     set(TARGET "binary_${VARIANT}")

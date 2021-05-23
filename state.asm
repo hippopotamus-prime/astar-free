@@ -137,13 +137,11 @@ advance: subroutine
     ;-- Inline: Check if every level is completed --
     ;input:  none (reads level_flags)
     ;output:  z if all are completed
-    ;destroys: a, x
-    ldy #4
-    lda #%11111111
-.loop:
-        and level_flags-1,y
-        dey
-        bne .loop
+    ;destroys: a
+    lda level_flags
+    and level_flags+1
+    and level_flags+2
+    and level_flags+3
     eor #%11111111
 
     bne .no_win
@@ -156,7 +154,8 @@ advance: subroutine
     lda level
     cmp #LEVELS
     bcc .no_wrap
-        sty level   ;y=0 from the loop
+        lda #0
+        sta level
 .no_wrap:
     inc level
 

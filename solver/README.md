@@ -34,7 +34,7 @@ and continue to the end of the line.
 
 Character | Meaning
 --------- | -------
-W|Wall
+#|Wall
 .|Empty space
 o|Collectable item
 P|Player start position

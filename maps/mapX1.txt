@@ -32,13 +32,13 @@
 ; - The items mostly act as breadcrumbs leading you on the correct path,
 ;   with few real choices presented
 
-WWWWWWWWWWWWWWWW
-W..BWW..WW...WWW
-W.oW..o.W.....PW
-W.......WWo.o.oW
-WWW.W.o..W.....W
-W.o.WWo..WWW.WWW
-W.W...o..Wo...oW
-W...W.oWWW..W.oW
-W.o.W.....o....W
-WWWWWWWWWWWWWWWW
+################
+#..B##..##...###
+#.o#..o.#.....P#
+#.......##o.o.o#
+###.#.o..#.....#
+#.o.##o..###.###
+#.#...o..#o...o#
+#...#.o###..#.o#
+#.o.#.....o....#
+################

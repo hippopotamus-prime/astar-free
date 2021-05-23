@@ -27,13 +27,13 @@
 ; - More choices are presented where the better path is only apparent
 ;   several moves deep
 
-WWWWWWWWWWWWWWWW
-W....W...WBW..oW
-W.WWoW..oW..o..W
-W........W.o.W.W
-Wo......Wo...W.W
-WWWWW.W...W.oW.W
-W..o..WWW.Wo...W
-W.W....W..o.WW.W
-Wo.P.o.W.o.....W
-WWWWWWWWWWWWWWWW
+################
+#....#...#B#..o#
+#.##o#..o#..o..#
+#........#.o.#.#
+#o......#o...#.#
+#####.#...#.o#.#
+#..o..###.#o...#
+#.#....#..o.##.#
+#o.P.o.#.o.....#
+################

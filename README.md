@@ -29,12 +29,17 @@ which inspired the puzzle mechanic. Coincidentally, the game is also a good
 use case for the [A*](https://en.wikipedia.org/wiki/A*_search_algorithm)
 pathfinding algorithm.
 
+## Free Software
+AStar is free software as described by the GNU General Public License (v3).
+See LICENSE.md for details. The license does not apply to content exclusive
+to the cartridge version of the game, described below.
+
 ## Cartridges
 Want a copy on a real physical cartridge? Get it from
 [Atari Age](https://atariage.com/store/index.php?l=product_detail&p=821)!
 
 The cartridge includes **24 unique levels** that are not present in the
-GitHub version of the game. The 8 levels in the GitHub version were created
+open source version of the game. The 8 levels here on GitHub were created
 specifically for the open source release and likewise do not appear in the
 cartridge version.
 

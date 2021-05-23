@@ -33,6 +33,11 @@ pathfinding algorithm.
 Want a copy on a real physical cartridge? Get it from
 [Atari Age](https://atariage.com/store/index.php?l=product_detail&p=821)!
 
+The cartridge includes **24 unique levels** that are not present in the
+GitHub version of the game. The 8 levels in the GitHub version were created
+specifically for the open source release and likewise do not appear in the
+cartridge version.
+
 ## Controls
 Input|Action
 -----|------

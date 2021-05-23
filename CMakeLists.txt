@@ -72,32 +72,17 @@ function(add_maps)
 endfunction()
 
 # List all map files in maps/ - these will be processed by the solver.
+# A 4k Atari ROM can hold a maximum of 25 maps.
 add_maps(
-    mapE1
-    mapE2
-    map01
-    map02
-    map03
-    map04
-    map05
-    map06
-    map07
-    map08
-    map09
-    map10
-    map11
-    map12
-    map13
-    map14
-    map15
-    map16
-    map17
-    map18
-    map19
-    map20
-    map21
-    map22
-    mapS1
+    mapX1
+    mapX2
+    mapX3
+    mapX4
+    mapX5
+    mapX6
+    mapX7
+    mapX8
+    mapXS
 )
 
 # Prepare rules to build the binaries.

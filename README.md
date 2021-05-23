@@ -55,11 +55,15 @@ Select|Skip to the next level
 Reset + Select|Return to the title screen
 
 ## AtariVox Support
-The game has some limited support for the
+The game source has some limited support for the
 [AtariVox](https://atariage.com/store/index.php?l=product_detail&p=1045).
-There's no speech, but the game uses the module's memory card to remember which
-levels have been completed in the minimum number of moves. Each completed level
-is shown with a dot at the bottom of the screen.
+There's no speech, but the game can use the module's memory card to remember
+which levels have been completed in the minimum number of moves. Each completed
+level is shown with a dot at the bottom of the screen.
+
+The memory card feature is currently **disabled** to avoid conflicts with the
+cartridge version of the game. (If enabled, it would erase any progress for
+levels 9-24 since they don't exist in the open source version.)
 
 ## Map Solver
 The project includes a tool to find an optimal solution for each level using

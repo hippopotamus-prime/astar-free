@@ -206,10 +206,14 @@ advance: subroutine
     ;---- Sync memory card ----
     ;STATE_MEMORY --> STATE_FADE_IN
 memory: subroutine
-    lda #<do_memory
-    sta kernel_addr
-    lda #>do_memory
-    sta kernel_addr+1
+    ; Disabled - since this version of the game has different levels, it
+    ; wouldn't be a good idea to wipe out people's progress on the cartridge
+    ; version.
+
+    ;lda #<do_memory
+    ;sta kernel_addr
+    ;lda #>do_memory
+    ;sta kernel_addr+1
     lda #STATE_FADE_IN
     sta state
     rts

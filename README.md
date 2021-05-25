@@ -6,6 +6,9 @@
 ![Level 6](https://i.imgur.com/U2s57Z2.png)
 ![Level 25](https://i.imgur.com/giwChUF.png)
 
+## Play Online
+[Play AStar at Javatari.org](https://javatari.org/?ROM=https://github.com/hippopotamus-prime/astar-free/releases/download/v1.0/astar-free.zip)
+
 ## About
 **AStar** is a puzzle game for the Atari 2600 featuring colorful graphics
 and a unique play mechanic. You control a character ("Bob") who must navigate
